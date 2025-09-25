@@ -4,23 +4,32 @@ import DocNumber from "../models/numbering.model.js"; // untuk auto-number
 // CREATE
 export const createPKS = async (req, res) => {
     try {
-        // generate nomor dokumen unik
-        const seq = await DocNumber.getNextSeq("PKS");
-        const nomor = `PKS-${new Date().getFullYear()}-${String(seq).padStart(
-            4,
-            "0"
-        )}`;
-
-        const pks = new PKS({
+        // 1. Validasi dulu tanpa nomor
+        const pksTemp = new PKS({
             ...req.body,
             content: {
                 ...req.body.content,
-                nomor,
+                nomor: "TEMP", // temporary value
             },
         });
 
-        const saved = await pks.save();
-        res.status(201).json({ message: "PKS created successfully", data: saved });
+        // 2. Trigger validasi tanpa save
+        await pksTemp.validate();
+
+        // 3. Jika validasi OK, baru generate nomor
+        const seq = await DocNumber.getNextSeq("PKS");
+        const nomor = `PKS-${new Date().getFullYear()}-${String(seq).padStart(4, "0")}`;
+
+        // 4. Set nomor yang benar
+        pksTemp.content.nomor = nomor;
+
+        // 5. Save ke database
+        const saved = await pksTemp.save();
+
+        res.status(201).json({
+            message: "PKS created successfully",
+            data: saved
+        });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }

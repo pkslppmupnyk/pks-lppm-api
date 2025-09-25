@@ -7,8 +7,12 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv-flow";
 dotenv.config();
 
-//import
+//import route
 import pksRouter from "./routes/pks.routes.js";
+
+//database
+import connectDB from "./config/database.js";
+connectDB();
 
 const server = express();
 server.use(cors());

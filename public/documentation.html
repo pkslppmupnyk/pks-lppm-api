@@ -1,13 +1,416 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
-    <title>API Docs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - PKS Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            font-size: 24px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .get {
+            background: #61affe;
+            color: white;
+        }
+
+        .post {
+            background: #49cc90;
+            color: white;
+        }
+
+        .patch {
+            background: #fca130;
+            color: white;
+        }
+
+        .delete {
+            background: #f93e3e;
+            color: white;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .description {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-default {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-alt {
+            background: #6c757d;
+            color: white;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .note strong {
+            color: #856404;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #e83e8c;
+        }
+
+        .example {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 
 <body>
-<h1>Dokumentasi API</h1>
-<p>Belum ada konten.</p>
+    <div class="container">
+        <h1>📚 API Documentation</h1>
+        <p class="subtitle">PKS (Perjanjian Kerja Sama) Management System</p>
+
+        <div class="note">
+            <strong>Base URL:</strong> <code>http://localhost:3000/api/pks</code>
+        </div>
+
+        <!-- PKS CRUD Operations -->
+        <h2>📋 PKS CRUD Operations</h2>
+
+        <div class="section">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/pks</span>
+                <p class="description">Membuat PKS baru dengan auto-generate nomor</p>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/pks</span>
+                <p class="description">Mengambil semua PKS dengan optional filter & pagination</p>
+            </div>
+        </div>
+
+        <!-- BY NOMOR (Default) -->
+        <h2>🔢 Operations by Nomor PKS <span class="badge badge-default">DEFAULT</span></h2>
+
+        <h3>PKS Operations</h3>
+        <div class="section">
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/pks/:nomor</span>
+                <p class="description">Mengambil detail PKS berdasarkan nomor</p>
+                <div class="example">GET /api/pks/PKS-2025-0001</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method patch">PATCH</span>
+                <span class="endpoint-url">/api/pks/:nomor</span>
+                <p class="description">Update PKS berdasarkan nomor</p>
+                <div class="example">PATCH /api/pks/PKS-2025-0001</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-url">/api/pks/:nomor</span>
+                <p class="description">Hapus PKS berdasarkan nomor</p>
+                <div class="example">DELETE /api/pks/PKS-2025-0001</div>
+            </div>
+        </div>
+
+        <h3>File Operations</h3>
+        <div class="section">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/pks/:nomor/file</span>
+                <p class="description">Upload/Replace file PKS berdasarkan nomor</p>
+                <div class="example">POST /api/pks/PKS-2025-0001/file</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/pks/:nomor/file</span>
+                <p class="description">Download file PKS berdasarkan nomor</p>
+                <div class="example">GET /api/pks/PKS-2025-0001/file</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-url">/api/pks/:nomor/file</span>
+                <p class="description">Hapus file PKS berdasarkan nomor</p>
+                <div class="example">DELETE /api/pks/PKS-2025-0001/file</div>
+            </div>
+        </div>
+
+        <!-- BY ID (Alternative) -->
+        <h2>🆔 Operations by ID <span class="badge badge-alt">ALTERNATIVE</span></h2>
+
+        <h3>PKS Operations</h3>
+        <div class="section">
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/pks/byid/:id</span>
+                <p class="description">Mengambil detail PKS berdasarkan ID</p>
+                <div class="example">GET /api/pks/byid/67890abcdef12345</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method patch">PATCH</span>
+                <span class="endpoint-url">/api/pks/byid/:id</span>
+                <p class="description">Update PKS berdasarkan ID</p>
+                <div class="example">PATCH /api/pks/byid/67890abcdef12345</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-url">/api/pks/byid/:id</span>
+                <p class="description">Hapus PKS berdasarkan ID</p>
+                <div class="example">DELETE /api/pks/byid/67890abcdef12345</div>
+            </div>
+        </div>
+
+        <h3>File Operations</h3>
+        <div class="section">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/pks/byid/:id/file</span>
+                <p class="description">Upload/Replace file PKS berdasarkan ID</p>
+                <div class="example">POST /api/pks/byid/67890abcdef12345/file</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/pks/byid/:id/file</span>
+                <p class="description">Download file PKS berdasarkan ID</p>
+                <div class="example">GET /api/pks/byid/67890abcdef12345/file</div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-url">/api/pks/byid/:id/file</span>
+                <p class="description">Hapus file PKS berdasarkan ID</p>
+                <div class="example">DELETE /api/pks/byid/67890abcdef12345/file</div>
+            </div>
+        </div>
+
+        <!-- Query Parameters -->
+        <h2>🔍 Query Parameters</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>status</code></td>
+                    <td>String</td>
+                    <td>Filter berdasarkan status</td>
+                    <td>?status=approved</td>
+                </tr>
+                <tr>
+                    <td><code>page</code></td>
+                    <td>Number</td>
+                    <td>Halaman data (default: 1)</td>
+                    <td>?page=2</td>
+                </tr>
+                <tr>
+                    <td><code>limit</code></td>
+                    <td>Number</td>
+                    <td>Jumlah data per halaman (default: 10)</td>
+                    <td>?limit=20</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Status Values -->
+        <h2>📊 Status Values</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>draft</code></td>
+                    <td>PKS masih dalam tahap draft</td>
+                </tr>
+                <tr>
+                    <td><code>menunggu dokumen</code></td>
+                    <td>Menunggu upload dokumen</td>
+                </tr>
+                <tr>
+                    <td><code>menunggu review</code></td>
+                    <td>Dokumen sedang direview</td>
+                </tr>
+                <tr>
+                    <td><code>approved</code></td>
+                    <td>PKS sudah disetujui</td>
+                </tr>
+                <tr>
+                    <td><code>rejected</code></td>
+                    <td>PKS ditolak</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- File Upload Info -->
+        <h2>📤 File Upload</h2>
+        <div class="note">
+            <strong>Format:</strong> PDF only<br>
+            <strong>Max Size:</strong> 10MB<br>
+            <strong>Field Name:</strong> <code>file</code><br>
+            <strong>Filename:</strong> <code>uploadedfile_[ID].pdf</code>
+        </div>
+
+        <!-- Notes -->
+        <h2>📝 Notes</h2>
+        <ul style="margin-left: 20px; color: #666;">
+            <li>✅ <strong>Recommended:</strong> Gunakan route dengan Nomor PKS untuk user-friendly</li>
+            <li>✅ <strong>Alternative:</strong> Gunakan route dengan ID untuk kebutuhan internal/admin</li>
+            <li>✅ File disimpan dengan format: <code>uploadedfile_[ID].pdf</code></li>
+            <li>✅ Upload file akan replace file lama jika sudah ada</li>
+            <li>✅ Hapus file akan menghapus dari folder dan database</li>
+        </ul>
+
+        <!-- Testing -->
+        <h2>🧪 Testing</h2>
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-url">/api/test</span>
+            <p class="description">Halaman testing untuk upload, download, dan delete file</p>
+            <div class="example">http://localhost:3000/api/test</div>
+        </div>
+    </div>
 </body>
 
 </html>

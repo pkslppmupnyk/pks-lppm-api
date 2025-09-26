@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKS File Upload Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .response.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .file-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #004085;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 PKS File Upload Test</h1>
+        <p class="subtitle">Test upload, download, dan hapus file PKS</p>
+
+        <!-- Upload Section -->
+        <div class="section">
+            <h2>📤 Upload File</h2>
+            <div class="input-group">
+                <label for="uploadNomor">Nomor PKS:</label>
+                <input type="text" id="uploadNomor" placeholder="Contoh: PKS-2025-0001">
+            </div>
+            <div class="input-group">
+                <label for="fileInput">Pilih File PDF:</label>
+                <input type="file" id="fileInput" accept=".pdf">
+            </div>
+            <div class="file-info">
+                ℹ️ File akan disimpan dengan nama: <code>uploadedfile_[ID].pdf</code>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="uploadFile()">Upload File</button>
+            </div>
+            <div id="uploadResponse" class="response"></div>
+        </div>
+
+        <!-- Download Section -->
+        <div class="section">
+            <h2>📥 Download File</h2>
+            <div class="input-group">
+                <label for="downloadNomor">Nomor PKS:</label>
+                <input type="text" id="downloadNomor" placeholder="Contoh: PKS-2025-0001">
+            </div>
+            <div class="btn-group">
+                <button class="btn-success" onclick="downloadFile()">Download File</button>
+            </div>
+            <div id="downloadResponse" class="response"></div>
+        </div>
+
+        <!-- Delete Section -->
+        <div class="section">
+            <h2>🗑️ Hapus File</h2>
+            <div class="input-group">
+                <label for="deleteNomor">Nomor PKS:</label>
+                <input type="text" id="deleteNomor" placeholder="Contoh: PKS-2025-0001">
+            </div>
+            <div class="btn-group">
+                <button class="btn-danger" onclick="deleteFile()">Hapus File</button>
+            </div>
+            <div id="deleteResponse" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/pks';
+
+        function showResponse(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = isError ? 'response error' : 'response success';
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        async function uploadFile() {
+            const nomor = document.getElementById('uploadNomor').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!nomor) {
+                showResponse('uploadResponse', '❌ Nomor PKS harus diisi!', true);
+                return;
+            }
+
+            if (!file) {
+                showResponse('uploadResponse', '❌ Pilih file terlebih dahulu!', true);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_URL}/${nomor}/file`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse('uploadResponse', `✅ ${data.message} - File: ${data.data.fileName}`);
+                    fileInput.value = '';
+                } else {
+                    showResponse('uploadResponse', `❌ ${data.message || data.error}`, true);
+                }
+            } catch (error) {
+                showResponse('uploadResponse', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function downloadFile() {
+            const nomor = document.getElementById('downloadNomor').value.trim();
+
+            if (!nomor) {
+                showResponse('downloadResponse', '❌ Nomor PKS harus diisi!', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${nomor}/file`);
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'download.pdf';
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+
+                    showResponse('downloadResponse', `✅ File berhasil didownload: ${filename}`);
+                } else {
+                    const data = await response.json();
+                    showResponse('downloadResponse', `❌ ${data.message || data.error}`, true);
+                }
+            } catch (error) {
+                showResponse('downloadResponse', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function deleteFile() {
+            const nomor = document.getElementById('deleteNomor').value.trim();
+
+            if (!nomor) {
+                showResponse('deleteResponse', '❌ Nomor PKS harus diisi!', true);
+                return;
+            }
+
+            if (!confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${nomor}/file`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse('deleteResponse', `✅ ${data.message}`);
+                } else {
+                    showResponse('deleteResponse', `❌ ${data.message || data.error}`, true);
+                }
+            } catch (error) {
+                showResponse('deleteResponse', `❌ Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+
+</html>

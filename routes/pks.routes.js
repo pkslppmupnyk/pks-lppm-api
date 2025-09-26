@@ -2,43 +2,77 @@ import { Router } from "express";
 const pksRouter = Router();
 
 import {
-    createPKS,
-    getAllPKS,
-    getPKSById,
-    updatePKS,
-    deletePKS,
+  createPKS,
+  getAllPKS,
+  getPKSByNomor,
+  updatePKSByNomor,
+  deletePKSByNomor,
+  getPKSById,
+  updatePKS,
+  deletePKS,
 } from "../controllers/pks.controller.js";
 
-// CREATE
+import {
+  uploadFile,
+  downloadFile,
+  deleteFile,
+  uploadFileById,
+  downloadFileById,
+  deleteFileById,
+} from "../controllers/file.controller.js";
+
+import upload from "../middleware/upload.middleware.js";
+
+// ==================== PKS CRUD ====================
+
+// CREATE - Buat PKS baru
 pksRouter.post("/", createPKS);
 
-// READ
-pksRouter.get("/", getAllPKS); // semua PKS (dengan filter optional)
-pksRouter.get("/:id", getPKSById); // detail PKS by ID
+// READ - Ambil semua PKS (dengan filter & pagination)
+pksRouter.get("/", getAllPKS);
 
-// UPDATE (PATCH lebih cocok untuk partial update)
-pksRouter.patch("/:id", updatePKS);
+// ==================== PKS BY NOMOR (DEFAULT) ====================
 
-// DELETE
-pksRouter.delete("/:id", deletePKS);
+// READ - Detail PKS by Nomor
+pksRouter.get("/:nomor", getPKSByNomor);
 
-// Edit file PKS (replace file lama)
-pksRouter.put("/:id/file", (req, res) => {
-    const { id } = req.params;
-    const filePath = req.file.path;
-    res.send(`File PKS ID: ${id} berhasil diupdate, path baru: ${filePath}`);
-});
+// UPDATE - Update PKS by Nomor
+pksRouter.patch("/:nomor", updatePKSByNomor);
 
-// Hapus file PKS
-pksRouter.delete("/:id/file", (req, res) => {
-    const { id } = req.params;
-    res.send(`File PKS ID: ${id} berhasil dihapus`);
-});
+// DELETE - Hapus PKS by Nomor
+pksRouter.delete("/:nomor", deletePKSByNomor);
 
-// Download file PKS
-pksRouter.get("/:id/file", (req, res) => {
-    const { id } = req.params;
-    res.send(`Download file PKS ID: ${id}`);
-});
+// ==================== FILE OPERATIONS BY NOMOR (DEFAULT) ====================
+
+// UPLOAD/REPLACE - Upload file by Nomor
+pksRouter.post("/:nomor/file", upload.single("file"), uploadFile);
+
+// DOWNLOAD - Download file by Nomor
+pksRouter.get("/:nomor/file", downloadFile);
+
+// DELETE - Hapus file by Nomor
+pksRouter.delete("/:nomor/file", deleteFile);
+
+// ==================== PKS BY ID ====================
+
+// READ - Detail PKS by ID
+pksRouter.get("/byid/:id", getPKSById);
+
+// UPDATE - Update PKS by ID
+pksRouter.patch("/byid/:id", updatePKS);
+
+// DELETE - Hapus PKS by ID
+pksRouter.delete("/byid/:id", deletePKS);
+
+// ==================== FILE OPERATIONS BY ID ====================
+
+// UPLOAD/REPLACE - Upload file by ID
+pksRouter.post("/byid/:id/file", upload.single("file"), uploadFileById);
+
+// DOWNLOAD - Download file by ID
+pksRouter.get("/byid/:id/file", downloadFileById);
+
+// DELETE - Hapus file by ID
+pksRouter.delete("/byid/:id/file", deleteFileById);
 
 export default pksRouter;

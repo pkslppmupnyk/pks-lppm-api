@@ -63,12 +63,13 @@ const pksSchema = new mongoose.Schema(
       status: {
         type: String,
         enum: [
+          "draft",
           "menunggu dokumen",
           "menunggu review",
           "approved",
           "rejected",
         ],
-        default: "menunggu dokumen",
+        default: "draft",
         index: true,
       },
       comment: {

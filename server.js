@@ -22,15 +22,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // static & routes
-
+//  halaman dokumentasi
 server.get("/api", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "documentation.html"));
+  res.sendFile(path.join(__dirname, "public", "documentation.html"));
 });
 
+//  halaman testing
+server.use("/api/test", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "upload_test.html"));
+});
+
+//  routes PKS dan File Upload
 server.use("/api/pks", pksRouter);
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

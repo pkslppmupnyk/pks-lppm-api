@@ -1,10 +1,29 @@
 import PKS from "../models/pks.model.js";
 import DocNumber from "../models/numbering.model.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Helper function untuk mencari PKS by nomor
 const findPKSByNomor = async (nomor) => {
   const pks = await PKS.findOne({ "content.nomor": nomor });
   return pks;
+};
+
+// Helper function untuk hapus file
+const deleteFileFromServer = async (fileName) => {
+  if (!fileName) return;
+
+  try {
+    const filePath = path.join(__dirname, "../file", fileName);
+    await fs.unlink(filePath);
+    console.log(`File deleted: ${fileName}`);
+  } catch (err) {
+    console.log(`File not found or already deleted: ${fileName}`);
+  }
 };
 
 // CREATE
@@ -129,9 +148,17 @@ export const deletePKSByNomor = async (req, res) => {
         .json({ message: "PKS not found with nomor: " + nomor });
     }
 
+    // Hapus file jika ada
+    if (pks.fileUpload.fileName) {
+      await deleteFileFromServer(pks.fileUpload.fileName);
+    }
+
     await PKS.findByIdAndDelete(pks._id);
 
-    res.json({ message: "PKS deleted successfully", nomor: nomor });
+    res.json({
+      message: "PKS and associated file deleted successfully",
+      nomor: nomor,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -175,13 +202,22 @@ export const updatePKS = async (req, res) => {
 // DELETE by ID
 export const deletePKS = async (req, res) => {
   try {
-    const deleted = await PKS.findByIdAndDelete(req.params.id);
+    const deleted = await PKS.findById(req.params.id);
 
     if (!deleted) {
       return res.status(404).json({ message: "PKS not found" });
     }
 
-    res.json({ message: "PKS deleted successfully" });
+    // Hapus file jika ada
+    if (deleted.fileUpload.fileName) {
+      await deleteFileFromServer(deleted.fileUpload.fileName);
+    }
+
+    await PKS.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message: "PKS and associated file deleted successfully",
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

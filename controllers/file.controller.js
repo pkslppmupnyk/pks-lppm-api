@@ -36,24 +36,27 @@ export const uploadFile = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Hapus file lama jika ada
-    if (pks.fileUpload.fileName) {
-      const oldFilePath = path.join(
-        __dirname,
-        "../file",
-        pks.fileUpload.fileName
-      );
-      try {
-        await fs.unlink(oldFilePath);
-      } catch (err) {
-        console.log("Old file not found or already deleted");
-      }
+    // Verifikasi bahwa file benar-benar ada di folder
+    const newFilePath = req.file.path;
+    try {
+      await fs.access(newFilePath);
+      console.log(`File successfully uploaded to: ${newFilePath}`);
+    } catch (err) {
+      console.error("Uploaded file not found:", newFilePath);
+      return res
+        .status(500)
+        .json({ message: "File upload failed - file not found after upload" });
     }
 
     // Update database dengan info file baru
     pks.fileUpload.docName = req.file.originalname;
     pks.fileUpload.fileName = req.file.filename;
     await pks.save();
+
+    console.log(`Database updated for PKS ${nomor}:`, {
+      docName: pks.fileUpload.docName,
+      fileName: pks.fileUpload.fileName,
+    });
 
     res.status(200).json({
       message: "File uploaded successfully",
@@ -64,6 +67,7 @@ export const uploadFile = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Upload error:", err);
     // Hapus file jika terjadi error
     if (req.file) {
       try {
@@ -97,7 +101,9 @@ export const downloadFile = async (req, res) => {
     // Cek apakah file exists
     try {
       await fs.access(filePath);
+      console.log(`File found for download: ${filePath}`);
     } catch (err) {
+      console.error(`File not found: ${filePath}`);
       return res.status(404).json({ message: "File not found on server" });
     }
 
@@ -133,6 +139,7 @@ export const deleteFile = async (req, res) => {
     const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
     try {
       await fs.unlink(filePath);
+      console.log(`File deleted: ${filePath}`);
     } catch (err) {
       console.log("File not found on server, will clear database record");
     }
@@ -173,24 +180,27 @@ export const uploadFileById = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Hapus file lama jika ada
-    if (pks.fileUpload.fileName) {
-      const oldFilePath = path.join(
-        __dirname,
-        "../file",
-        pks.fileUpload.fileName
-      );
-      try {
-        await fs.unlink(oldFilePath);
-      } catch (err) {
-        console.log("Old file not found or already deleted");
-      }
+    // Verifikasi bahwa file benar-benar ada di folder
+    const newFilePath = req.file.path;
+    try {
+      await fs.access(newFilePath);
+      console.log(`File successfully uploaded to: ${newFilePath}`);
+    } catch (err) {
+      console.error("Uploaded file not found:", newFilePath);
+      return res
+        .status(500)
+        .json({ message: "File upload failed - file not found after upload" });
     }
 
     // Update database dengan info file baru
     pks.fileUpload.docName = req.file.originalname;
     pks.fileUpload.fileName = req.file.filename;
     await pks.save();
+
+    console.log(`Database updated for PKS ID ${id}:`, {
+      docName: pks.fileUpload.docName,
+      fileName: pks.fileUpload.fileName,
+    });
 
     res.status(200).json({
       message: "File uploaded successfully",
@@ -200,6 +210,7 @@ export const uploadFileById = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Upload error:", err);
     // Hapus file jika terjadi error
     if (req.file) {
       try {
@@ -231,7 +242,9 @@ export const downloadFileById = async (req, res) => {
     // Cek apakah file exists
     try {
       await fs.access(filePath);
+      console.log(`File found for download: ${filePath}`);
     } catch (err) {
+      console.error(`File not found: ${filePath}`);
       return res.status(404).json({ message: "File not found on server" });
     }
 
@@ -265,6 +278,7 @@ export const deleteFileById = async (req, res) => {
     const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
     try {
       await fs.unlink(filePath);
+      console.log(`File deleted: ${filePath}`);
     } catch (err) {
       console.log("File not found on server, will clear database record");
     }

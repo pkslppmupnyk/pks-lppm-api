@@ -1,5 +1,6 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import PKS from "../models/pks.model.js";
 
@@ -14,20 +15,45 @@ const storage = multer.diskStorage({
   filename: async (req, file, cb) => {
     try {
       const { id, nomor } = req.params;
-      let pksId = id;
+      let pksNomor = nomor;
+      let existingPks = null;
 
-      // Jika menggunakan nomor, cari ID-nya dulu
-      if (nomor && !id) {
-        const pks = await PKS.findOne({ "content.nomor": nomor });
-        if (pks) {
-          pksId = pks._id.toString();
+      // Jika menggunakan ID, cari nomor PKS-nya dulu
+      if (id && !nomor) {
+        existingPks = await PKS.findById(id);
+        if (existingPks) {
+          pksNomor = existingPks.content.nomor;
         }
+      } else if (nomor) {
+        // Jika menggunakan nomor, cari PKS-nya untuk mendapatkan info file lama
+        existingPks = await PKS.findOne({ "content.nomor": nomor });
       }
 
       const ext = path.extname(file.originalname);
-      const filename = `uploadedfile_${pksId}${ext}`;
+      const filename = `uploadedfile_${pksNomor}${ext}`;
+
+      // Hapus file lama jika ada sebelum membuat file baru
+      if (existingPks && existingPks.fileUpload.fileName) {
+        const oldFilePath = path.join(
+          __dirname,
+          "../file",
+          existingPks.fileUpload.fileName
+        );
+        try {
+          await fs.access(oldFilePath); // Check if file exists
+          await fs.unlink(oldFilePath); // Delete old file
+          console.log(`Deleted old file: ${existingPks.fileUpload.fileName}`);
+        } catch (err) {
+          console.log(
+            "Old file not found or already deleted:",
+            existingPks.fileUpload.fileName
+          );
+        }
+      }
+
       cb(null, filename);
     } catch (error) {
+      console.error("Error in filename generation:", error);
       cb(error, null);
     }
   },

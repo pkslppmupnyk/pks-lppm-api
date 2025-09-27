@@ -22,6 +22,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // static & routes
+
+// STATIC FILES - Serve seluruh folder public
+server.use("/api/css", express.static(path.join(__dirname, "public/css")));
+server.use("/api/js", express.static(path.join(__dirname, "public/js")));
+
 //  halaman dokumentasi
 server.get("/api", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "documentation.html"));

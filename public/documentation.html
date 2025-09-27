@@ -5,188 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Documentation - PKS Management</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-
-        h2 {
-            color: #444;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-            font-size: 24px;
-        }
-
-        h3 {
-            color: #555;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-
-        .method {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            margin-right: 10px;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .get {
-            background: #61affe;
-            color: white;
-        }
-
-        .post {
-            background: #49cc90;
-            color: white;
-        }
-
-        .patch {
-            background: #fca130;
-            color: white;
-        }
-
-        .delete {
-            background: #f93e3e;
-            color: white;
-        }
-
-        .endpoint {
-            background: #f8f9fa;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 6px;
-            border-left: 4px solid #667eea;
-        }
-
-        .endpoint-url {
-            font-family: 'Courier New', monospace;
-            color: #333;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .description {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .badge-default {
-            background: #28a745;
-            color: white;
-        }
-
-        .badge-alt {
-            background: #6c757d;
-            color: white;
-        }
-
-        .section {
-            margin-bottom: 30px;
-        }
-
-        .note {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-
-        .note strong {
-            color: #856404;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background: #667eea;
-            color: white;
-            font-weight: 600;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #e83e8c;
-        }
-
-        .example {
-            background: #263238;
-            color: #aed581;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            overflow-x: auto;
-            margin: 10px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="/api/css/documentation.css">
 </head>
 
 <body>
@@ -389,7 +208,8 @@
             <strong>Format:</strong> PDF only<br>
             <strong>Max Size:</strong> 10MB<br>
             <strong>Field Name:</strong> <code>file</code><br>
-            <strong>Filename:</strong> <code>uploadedfile_[ID].pdf</code>
+            <strong>Filename Format:</strong> <code>uploadedfile_[NOMOR-PKS].pdf</code><br>
+            <strong>Example:</strong> <code>uploadedfile_PKS-2025-0001.pdf</code>
         </div>
 
         <!-- Notes -->
@@ -397,9 +217,10 @@
         <ul style="margin-left: 20px; color: #666;">
             <li>✅ <strong>Recommended:</strong> Gunakan route dengan Nomor PKS untuk user-friendly</li>
             <li>✅ <strong>Alternative:</strong> Gunakan route dengan ID untuk kebutuhan internal/admin</li>
-            <li>✅ File disimpan dengan format: <code>uploadedfile_[ID].pdf</code></li>
+            <li>✅ File disimpan dengan format: <code>uploadedfile_[NOMOR-PKS].pdf</code></li>
             <li>✅ Upload file akan replace file lama jika sudah ada</li>
             <li>✅ Hapus file akan menghapus dari folder dan database</li>
+            <li>✅ Hapus PKS akan otomatis menghapus file terkait</li>
         </ul>
 
         <!-- Testing -->

@@ -2,236 +2,466 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation - PKS Management</title>
-    <link rel="stylesheet" href="/api/css/documentation.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PKS-LPPM API Documentation</title>
+    <link rel="stylesheet" href="./css/documentation.css" />
 </head>
 
 <body>
-    <div class="container">
-        <h1>📚 API Documentation</h1>
-        <p class="subtitle">PKS (Perjanjian Kerja Sama) Management System</p>
-
-        <div class="note">
-            <strong>Base URL:</strong> <code>http://localhost:3000/api/pks</code>
-        </div>
-
-        <!-- PKS CRUD Operations -->
-        <h2>📋 PKS CRUD Operations</h2>
-
-        <div class="section">
-            <div class="endpoint">
-                <span class="method post">POST</span>
-                <span class="endpoint-url">/api/pks</span>
-                <p class="description">Membuat PKS baru dengan auto-generate nomor</p>
-            </div>
-
-            <div class="endpoint">
-                <span class="method get">GET</span>
-                <span class="endpoint-url">/api/pks</span>
-                <p class="description">Mengambil semua PKS dengan optional filter & pagination</p>
-            </div>
-        </div>
-
-        <!-- BY NOMOR (Default) -->
-        <h2>🔢 Operations by Nomor PKS <span class="badge badge-default">DEFAULT</span></h2>
-
-        <h3>PKS Operations</h3>
-        <div class="section">
-            <div class="endpoint">
-                <span class="method get">GET</span>
-                <span class="endpoint-url">/api/pks/:nomor</span>
-                <p class="description">Mengambil detail PKS berdasarkan nomor</p>
-                <div class="example">GET /api/pks/PKS-2025-0001</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method patch">PATCH</span>
-                <span class="endpoint-url">/api/pks/:nomor</span>
-                <p class="description">Update PKS berdasarkan nomor</p>
-                <div class="example">PATCH /api/pks/PKS-2025-0001</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method delete">DELETE</span>
-                <span class="endpoint-url">/api/pks/:nomor</span>
-                <p class="description">Hapus PKS berdasarkan nomor</p>
-                <div class="example">DELETE /api/pks/PKS-2025-0001</div>
-            </div>
-        </div>
-
-        <h3>File Operations</h3>
-        <div class="section">
-            <div class="endpoint">
-                <span class="method post">POST</span>
-                <span class="endpoint-url">/api/pks/:nomor/file</span>
-                <p class="description">Upload/Replace file PKS berdasarkan nomor</p>
-                <div class="example">POST /api/pks/PKS-2025-0001/file</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method get">GET</span>
-                <span class="endpoint-url">/api/pks/:nomor/file</span>
-                <p class="description">Download file PKS berdasarkan nomor</p>
-                <div class="example">GET /api/pks/PKS-2025-0001/file</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method delete">DELETE</span>
-                <span class="endpoint-url">/api/pks/:nomor/file</span>
-                <p class="description">Hapus file PKS berdasarkan nomor</p>
-                <div class="example">DELETE /api/pks/PKS-2025-0001/file</div>
-            </div>
-        </div>
-
-        <!-- BY ID (Alternative) -->
-        <h2>🆔 Operations by ID <span class="badge badge-alt">ALTERNATIVE</span></h2>
-
-        <h3>PKS Operations</h3>
-        <div class="section">
-            <div class="endpoint">
-                <span class="method get">GET</span>
-                <span class="endpoint-url">/api/pks/byid/:id</span>
-                <p class="description">Mengambil detail PKS berdasarkan ID</p>
-                <div class="example">GET /api/pks/byid/67890abcdef12345</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method patch">PATCH</span>
-                <span class="endpoint-url">/api/pks/byid/:id</span>
-                <p class="description">Update PKS berdasarkan ID</p>
-                <div class="example">PATCH /api/pks/byid/67890abcdef12345</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method delete">DELETE</span>
-                <span class="endpoint-url">/api/pks/byid/:id</span>
-                <p class="description">Hapus PKS berdasarkan ID</p>
-                <div class="example">DELETE /api/pks/byid/67890abcdef12345</div>
-            </div>
-        </div>
-
-        <h3>File Operations</h3>
-        <div class="section">
-            <div class="endpoint">
-                <span class="method post">POST</span>
-                <span class="endpoint-url">/api/pks/byid/:id/file</span>
-                <p class="description">Upload/Replace file PKS berdasarkan ID</p>
-                <div class="example">POST /api/pks/byid/67890abcdef12345/file</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method get">GET</span>
-                <span class="endpoint-url">/api/pks/byid/:id/file</span>
-                <p class="description">Download file PKS berdasarkan ID</p>
-                <div class="example">GET /api/pks/byid/67890abcdef12345/file</div>
-            </div>
-
-            <div class="endpoint">
-                <span class="method delete">DELETE</span>
-                <span class="endpoint-url">/api/pks/byid/:id/file</span>
-                <p class="description">Hapus file PKS berdasarkan ID</p>
-                <div class="example">DELETE /api/pks/byid/67890abcdef12345/file</div>
-            </div>
-        </div>
-
-        <!-- Query Parameters -->
-        <h2>🔍 Query Parameters</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Example</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>status</code></td>
-                    <td>String</td>
-                    <td>Filter berdasarkan status</td>
-                    <td>?status=approved</td>
-                </tr>
-                <tr>
-                    <td><code>page</code></td>
-                    <td>Number</td>
-                    <td>Halaman data (default: 1)</td>
-                    <td>?page=2</td>
-                </tr>
-                <tr>
-                    <td><code>limit</code></td>
-                    <td>Number</td>
-                    <td>Jumlah data per halaman (default: 10)</td>
-                    <td>?limit=20</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Status Values -->
-        <h2>📊 Status Values</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>draft</code></td>
-                    <td>PKS masih dalam tahap draft</td>
-                </tr>
-                <tr>
-                    <td><code>menunggu dokumen</code></td>
-                    <td>Menunggu upload dokumen</td>
-                </tr>
-                <tr>
-                    <td><code>menunggu review</code></td>
-                    <td>Dokumen sedang direview</td>
-                </tr>
-                <tr>
-                    <td><code>approved</code></td>
-                    <td>PKS sudah disetujui</td>
-                </tr>
-                <tr>
-                    <td><code>rejected</code></td>
-                    <td>PKS ditolak</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- File Upload Info -->
-        <h2>📤 File Upload</h2>
-        <div class="note">
-            <strong>Format:</strong> PDF only<br>
-            <strong>Max Size:</strong> 10MB<br>
-            <strong>Field Name:</strong> <code>file</code><br>
-            <strong>Filename Format:</strong> <code>uploadedfile_[NOMOR-PKS].pdf</code><br>
-            <strong>Example:</strong> <code>uploadedfile_PKS-2025-0001.pdf</code>
-        </div>
-
-        <!-- Notes -->
-        <h2>📝 Notes</h2>
-        <ul style="margin-left: 20px; color: #666;">
-            <li>✅ <strong>Recommended:</strong> Gunakan route dengan Nomor PKS untuk user-friendly</li>
-            <li>✅ <strong>Alternative:</strong> Gunakan route dengan ID untuk kebutuhan internal/admin</li>
-            <li>✅ File disimpan dengan format: <code>uploadedfile_[NOMOR-PKS].pdf</code></li>
-            <li>✅ Upload file akan replace file lama jika sudah ada</li>
-            <li>✅ Hapus file akan menghapus dari folder dan database</li>
-            <li>✅ Hapus PKS akan otomatis menghapus file terkait</li>
+    <nav>
+        <h2>📘 Dokumentasi</h2>
+        <ul>
+            <li><a href="#overview">1. Overview</a></li>
+            <li><a href="#setup">2. Setup & Konfigurasi</a></li>
+            <li><a href="#auth">3. Autentikasi</a></li>
+            <li><a href="#models">4. Struktur Database</a></li>
+            <li><a href="#schema">5. Struktur JSON PKS</a></li>
+            <li><a href="#routes">6. Endpoint API</a></li>
+            <li><a href="#generator">7. Generate Dokumen PKS</a></li>
+            <li><a href="#error">8. Error Handling</a></li>
+            <li><a href="#security">9. Keamanan</a></li>
+            <li><a href="#arch">10. Arsitektur Proyek</a></li>
         </ul>
+    </nav>
 
-        <!-- Testing -->
-        <h2>🧪 Testing</h2>
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <span class="endpoint-url">/api/test</span>
-            <p class="description">Halaman testing untuk upload, download, dan delete file</p>
-            <div class="example">http://localhost:3000/api/test</div>
-        </div>
-    </div>
+    <main>
+        <section id="overview">
+            <h1>📘 PKS-LPPM API Documentation</h1>
+            <p>API resmi untuk pengelolaan <strong>Perjanjian Kerja Sama (PKS)</strong> LPPM UPN “Veteran” Yogyakarta.
+                Framework: <code>Node.js + Express</code>, database <code>MongoDB</code>, dokumen dibuat otomatis dengan
+                pustaka <code>docx</code>.</p>
+        </section>
+
+        <section id="setup">
+            <h2>2. Setup & Konfigurasi</h2>
+            <pre><code># Instalasi
+npm install
+
+# File .env.development
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/pksdb
+JWT_SECRET=secretkey
+BASE_URL=http://localhost:5000
+
+# Jalankan server
+npm run dev</code></pre>
+            <p>Dapat diakses melalui <code>http://localhost:5000/api</code></p>
+        </section>
+
+        <section id="auth">
+            <h2>3. Autentikasi</h2>
+            <p>Sistem hanya memiliki satu entitas pengguna, yaitu <strong>Admin</strong>.
+                Admin login melalui email & password, mendapatkan token JWT untuk otorisasi endpoint lainnya.</p>
+
+            <h3>Endpoint Autentikasi</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Akses</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/register</td>
+                    <td>Public</td>
+                    <td>Daftarkan admin baru (hanya digunakan saat setup awal)</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/login</td>
+                    <td>Public</td>
+                    <td>Login admin dan dapatkan JWT token</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/auth/me</td>
+                    <td>Admin</td>
+                    <td>Ambil data admin yang sedang login</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/logout</td>
+                    <td>Admin</td>
+                    <td>Logout dan hapus sesi aktif</td>
+                </tr>
+                <tr>
+                    <td>PATCH</td>
+                    <td>/api/auth/change-password</td>
+                    <td>Admin</td>
+                    <td>Ganti password akun admin</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="models">
+            <h2>4. Struktur Database</h2>
+            <h3>Admin Model</h3>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Tipe</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>String</td>
+                    <td>Nama login unik (minimal 3 karakter)</td>
+                </tr>
+                <tr>
+                    <td>email</td>
+                    <td>String</td>
+                    <td>Email unik (disimpan lowercase)</td>
+                </tr>
+                <tr>
+                    <td>password</td>
+                    <td>String</td>
+                    <td>Password terenkripsi (bcrypt hash)</td>
+                </tr>
+                <tr>
+                    <td>nama</td>
+                    <td>String</td>
+                    <td>Nama lengkap admin</td>
+                </tr>
+                <tr>
+                    <td>isActive</td>
+                    <td>Boolean</td>
+                    <td>Status akun (default: true)</td>
+                </tr>
+                <tr>
+                    <td>createdAt</td>
+                    <td>Date</td>
+                    <td>Tanggal dibuat otomatis</td>
+                </tr>
+                <tr>
+                    <td>updatedAt</td>
+                    <td>Date</td>
+                    <td>Tanggal terakhir diubah otomatis</td>
+                </tr>
+            </table>
+
+            <h3>PKS Model</h3>
+            <table>
+                <tr>
+                    <th>Bagian</th>
+                    <th>Field</th>
+                    <th>Tipe</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td rowspan="4">content</td>
+                    <td>nomor</td>
+                    <td>String</td>
+                    <td>Nomor PKS unik</td>
+                </tr>
+                <tr>
+                    <td>judul</td>
+                    <td>String</td>
+                    <td>Judul perjanjian</td>
+                </tr>
+                <tr>
+                    <td>tanggal</td>
+                    <td>Date</td>
+                    <td>Tanggal penandatanganan</td>
+                </tr>
+                <tr>
+                    <td>tanggalKadaluarsa</td>
+                    <td>Date</td>
+                    <td>Tanggal berakhir PKS</td>
+                </tr>
+                <tr>
+                    <td rowspan="6">pihakKedua</td>
+                    <td>instansi</td>
+                    <td>String</td>
+                    <td>Nama lembaga mitra</td>
+                </tr>
+                <tr>
+                    <td>nama</td>
+                    <td>String</td>
+                    <td>Nama penandatangan</td>
+                </tr>
+                <tr>
+                    <td>jabatan</td>
+                    <td>String</td>
+                    <td>Jabatan pihak kedua</td>
+                </tr>
+                <tr>
+                    <td>alamat</td>
+                    <td>String</td>
+                    <td>Alamat instansi</td>
+                </tr>
+                <tr>
+                    <td>nomor</td>
+                    <td>String</td>
+                    <td>Nomor telepon</td>
+                </tr>
+                <tr>
+                    <td>email</td>
+                    <td>String</td>
+                    <td>Email kontak</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="schema">
+            <h2>5. Struktur JSON PKS</h2>
+            <pre><code>{
+  "content": {
+    "judul": "Kerja Sama Pengembangan Riset",
+    "tanggal": "2025-10-07T00:00:00Z",
+    "tanggalKadaluarsa": "2026-10-07T00:00:00Z"
+  },
+  "pihakKedua": {
+    "instansi": "Universitas Gadjah Mada",
+    "nama": "Prof. Dr. Andi Wijaya",
+    "jabatan": "Rektor",
+    "alamat": "Jl. Kaliurang No. 1, Sleman, Yogyakarta",
+    "email": "andi.wijaya@ugm.ac.id"
+  }
+}</code></pre>
+        </section>
+
+        <section id="routes">
+            <h2>6. Endpoint API Lengkap</h2>
+
+            <h3>📄 PKS Routes</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Akses</th>
+                    <th>Controller</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/pks</td>
+                    <td>Public</td>
+                    <td>createPKS</td>
+                    <td>Ajukan PKS baru</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/pks</td>
+                    <td>Public</td>
+                    <td>getAllPKS</td>
+                    <td>Ambil semua PKS</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/pks/:nomor</td>
+                    <td>Public</td>
+                    <td>getPKSByNomor</td>
+                    <td>Ambil detail PKS berdasarkan nomor</td>
+                </tr>
+                <tr>
+                    <td>PATCH</td>
+                    <td>/api/pks/:nomor</td>
+                    <td>Admin</td>
+                    <td>updatePKSByNomor</td>
+                    <td>Ubah data PKS berdasarkan nomor</td>
+                </tr>
+                <tr>
+                    <td>DELETE</td>
+                    <td>/api/pks/:nomor</td>
+                    <td>Admin</td>
+                    <td>deletePKSByNomor</td>
+                    <td>Hapus PKS berdasarkan nomor</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/pks/id/:id</td>
+                    <td>Admin</td>
+                    <td>getPKSById</td>
+                    <td>Ambil detail PKS berdasarkan ObjectId</td>
+                </tr>
+                <tr>
+                    <td>PATCH</td>
+                    <td>/api/pks/id/:id</td>
+                    <td>Admin</td>
+                    <td>updatePKS</td>
+                    <td>Ubah data PKS berdasarkan ObjectId</td>
+                </tr>
+                <tr>
+                    <td>DELETE</td>
+                    <td>/api/pks/id/:id</td>
+                    <td>Admin</td>
+                    <td>deletePKS</td>
+                    <td>Hapus PKS berdasarkan ObjectId</td>
+                </tr>
+            </table>
+
+            <h3>📂 File & Dokumen Routes</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Akses</th>
+                    <th>Controller</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/pks/:nomor/file</td>
+                    <td>Public</td>
+                    <td>uploadFile</td>
+                    <td>Upload dokumen/lampiran PKS</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/pks/:nomor/file</td>
+                    <td>Public</td>
+                    <td>downloadFile</td>
+                    <td>Unduh file PKS</td>
+                </tr>
+                <tr>
+                    <td>DELETE</td>
+                    <td>/api/pks/:nomor/file</td>
+                    <td>Admin</td>
+                    <td>deleteFile</td>
+                    <td>Hapus file PKS</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/pks/:nomor/generate</td>
+                    <td>Admin</td>
+                    <td>generatePKSDocument</td>
+                    <td>Generate dokumen resmi PKS (.docx)</td>
+                </tr>
+            </table>
+
+            <h3>🔐 Autentikasi Routes</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Akses</th>
+                    <th>Controller</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/register</td>
+                    <td>Public</td>
+                    <td>register</td>
+                    <td>Registrasi admin</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/login</td>
+                    <td>Public</td>
+                    <td>login</td>
+                    <td>Login admin</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/api/auth/me</td>
+                    <td>Admin</td>
+                    <td>getMe</td>
+                    <td>Data admin login</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/api/auth/logout</td>
+                    <td>Admin</td>
+                    <td>logout</td>
+                    <td>Logout</td>
+                </tr>
+                <tr>
+                    <td>PATCH</td>
+                    <td>/api/auth/change-password</td>
+                    <td>Admin</td>
+                    <td>changePassword</td>
+                    <td>Ganti password admin</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="generator">
+            <h2>7. Generate Dokumen PKS</h2>
+            <p><code>documentGenerator.service.js</code> membentuk file <strong>.docx</strong> berdasarkan data dari
+                model PKS.</p>
+            <pre><code>POST /api/pks/:nomor/generate</code></pre>
+            <p><strong>Response:</strong></p>
+            <pre><code>{
+  "success": true,
+  "message": "Dokumen PKS berhasil dibuat",
+  "path": "/file/generated/pks_2025_001.docx"
+}</code></pre>
+        </section>
+
+        <section id="error">
+            <h2>8. Error Handling</h2>
+            <table>
+                <tr>
+                    <th>Kode</th>
+                    <th>Pesan</th>
+                    <th>Deskripsi</th>
+                </tr>
+                <tr>
+                    <td>400</td>
+                    <td>Validation Error</td>
+                    <td>Input tidak valid</td>
+                </tr>
+                <tr>
+                    <td>401</td>
+                    <td>Unauthorized</td>
+                    <td>Token tidak valid</td>
+                </tr>
+                <tr>
+                    <td>403</td>
+                    <td>Forbidden</td>
+                    <td>Akses ditolak (bukan admin)</td>
+                </tr>
+                <tr>
+                    <td>404</td>
+                    <td>Not Found</td>
+                    <td>Data tidak ditemukan</td>
+                </tr>
+                <tr>
+                    <td>500</td>
+                    <td>Server Error</td>
+                    <td>Kesalahan server</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="security">
+            <h2>9. Keamanan</h2>
+            <ul>
+                <li>Gunakan HTTPS untuk produksi.</li>
+                <li>Token JWT dikirim via header Authorization.</li>
+                <li>Rate limiter aktif pada endpoint login & register.</li>
+                <li>CORS diatur hanya untuk domain resmi frontend.</li>
+            </ul>
+        </section>
+
+        <section id="arch">
+            <h2>10. Arsitektur Proyek</h2>
+            <pre><code>server.js
+ ├── routes/
+ │    ├── auth.routes.js → Auth Controller → Admin Model
+ │    └── pks.routes.js  → PKS Controller  → PKS Model
+ ├── controllers/
+ │    ├── auth.controller.js
+ │    ├── pks.controller.js
+ │    ├── document.controller.js
+ │    └── file.controller.js
+ ├── services/documentGenerator.service.js
+ ├── middleware/
+ │    ├── auth.middleware.js
+ │    ├── upload.middleware.js
+ │    ├── validation.middleware.js
+ │    └── rateLimiter.middleware.js
+ └── public/
+      ├── documentation.html
+      ├── upload_test.html
+      ├── css/
+      └── js/
+</code></pre>
+        </section>
+    </main>
 </body>
 
 </html>

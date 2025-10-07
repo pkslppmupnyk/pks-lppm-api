@@ -9,6 +9,7 @@ dotenv.config();
 
 //import route
 import pksRouter from "./routes/pks.routes.js";
+import authRouter from "./routes/auth.routes.js";
 
 //database
 import connectDB from "./config/database.js";
@@ -36,6 +37,9 @@ server.get("/api", (req, res) => {
 server.use("/api/test", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "upload_test.html"));
 });
+
+//  routes Auth
+server.use("/api/auth", authRouter);
 
 //  routes PKS dan File Upload
 server.use("/api/pks", pksRouter);

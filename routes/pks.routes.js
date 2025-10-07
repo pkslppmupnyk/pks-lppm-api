@@ -21,58 +21,64 @@ import {
   deleteFileById,
 } from "../controllers/file.controller.js";
 
+import { generatePKSDocument } from "../controllers/document.controller.js";
+
 import upload from "../middleware/upload.middleware.js";
+import { protect } from "../middleware/auth.middleware.js";
 
 // ==================== PKS CRUD ====================
 
-// CREATE - Buat PKS baru
+// CREATE - Buat PKS baru (PUBLIC - siapa saja bisa)
 pksRouter.post("/", createPKS);
 
-// READ - Ambil semua PKS (dengan filter & pagination)
+// READ - Ambil semua PKS (PUBLIC - siapa saja bisa lihat)
 pksRouter.get("/", getAllPKS);
 
 // ==================== PKS BY NOMOR (DEFAULT) ====================
 
-// READ - Detail PKS by Nomor
+// READ - Detail PKS by Nomor (PUBLIC)
 pksRouter.get("/:nomor", getPKSByNomor);
 
-// UPDATE - Update PKS by Nomor
-pksRouter.patch("/:nomor", updatePKSByNomor);
+// UPDATE - Update PKS by Nomor (ADMIN ONLY)
+pksRouter.patch("/:nomor", protect, updatePKSByNomor);
 
-// DELETE - Hapus PKS by Nomor
-pksRouter.delete("/:nomor", deletePKSByNomor);
+// DELETE - Hapus PKS by Nomor (ADMIN ONLY)
+pksRouter.delete("/:nomor", protect, deletePKSByNomor);
 
 // ==================== FILE OPERATIONS BY NOMOR (DEFAULT) ====================
 
-// UPLOAD/REPLACE - Upload file by Nomor
+// UPLOAD/REPLACE - Upload file by Nomor (PUBLIC - siapa saja bisa upload)
 pksRouter.post("/:nomor/file", upload.single("file"), uploadFile);
 
-// DOWNLOAD - Download file by Nomor
+// DOWNLOAD - Download file by Nomor (PUBLIC)
 pksRouter.get("/:nomor/file", downloadFile);
 
-// DELETE - Hapus file by Nomor
-pksRouter.delete("/:nomor/file", deleteFile);
+// DELETE - Hapus file by Nomor (ADMIN ONLY)
+pksRouter.delete("/:nomor/file", protect, deleteFile);
+
+// Generate dokumen (PUBLIC - siapa saja bisa generate/download)
+pksRouter.get("/:nomor/generate", generatePKSDocument);
 
 // ==================== PKS BY ID ====================
 
-// READ - Detail PKS by ID
+// READ - Detail PKS by ID (PUBLIC)
 pksRouter.get("/byid/:id", getPKSById);
 
-// UPDATE - Update PKS by ID
-pksRouter.patch("/byid/:id", updatePKS);
+// UPDATE - Update PKS by ID (ADMIN ONLY)
+pksRouter.patch("/byid/:id", protect, updatePKS);
 
-// DELETE - Hapus PKS by ID
-pksRouter.delete("/byid/:id", deletePKS);
+// DELETE - Hapus PKS by ID (ADMIN ONLY)
+pksRouter.delete("/byid/:id", protect, deletePKS);
 
 // ==================== FILE OPERATIONS BY ID ====================
 
-// UPLOAD/REPLACE - Upload file by ID
+// UPLOAD/REPLACE - Upload file by ID (PUBLIC)
 pksRouter.post("/byid/:id/file", upload.single("file"), uploadFileById);
 
-// DOWNLOAD - Download file by ID
+// DOWNLOAD - Download file by ID (PUBLIC)
 pksRouter.get("/byid/:id/file", downloadFileById);
 
-// DELETE - Hapus file by ID
-pksRouter.delete("/byid/:id/file", deleteFileById);
+// DELETE - Hapus file by ID (ADMIN ONLY)
+pksRouter.delete("/byid/:id/file", protect, deleteFileById);
 
 export default pksRouter;

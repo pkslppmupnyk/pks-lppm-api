@@ -58,6 +58,21 @@
             </div>
             <div id="deleteResponse" class="response"></div>
         </div>
+
+        <!-- Generate Document Section -->
+        <div class="section">
+            <h2>📝 Generate Dokumen PKS</h2>
+            <div class="input-group">
+                <label for="generateNomor">Nomor PKS:</label>
+                <input type="text" id="generateNomor" placeholder="Contoh: PKS-2025-0001">
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="generateDocument()">Generate Dokumen</button>
+            </div>
+            <div id="generateResponse" class="response"></div>
+        </div>
+
+
     </div>
 
     <script src="/api/js/utils.js"></script>

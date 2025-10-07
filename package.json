@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development nodemon server.js"
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "start": "cross-env NODE_ENV=production node server.js"
   },
   "repository": {
     "type": "git",
@@ -20,11 +21,18 @@
   },
   "homepage": "https://github.com/bulanterbit/pks-lppm-api#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "docx": "^9.5.1",
     "dotenv-flow": "^4.1.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "terbilang": "^0.0.3"
   },
   "devDependencies": {
     "cross-env": "^10.0.0",

@@ -110,3 +110,51 @@ async function deleteFile() {
     showResponse("deleteResponse", `❌ Error: ${handleApiError(error)}`, true);
   }
 }
+
+// Generate Document Function
+async function generateDocument() {
+  const nomor = document.getElementById("generateNomor").value.trim();
+
+  // Validasi nomor
+  const nomorValidation = validateRequired(nomor, "Nomor PKS");
+  if (!nomorValidation.valid) {
+    showResponse("generateResponse", nomorValidation.message, true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/${nomor}/generate`);
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const filename =
+        response.headers
+          .get("Content-Disposition")
+          ?.split("filename=")[1]
+          ?.replace(/"/g, "") || `pks-${nomor}.docx`;
+
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+
+      showResponse(
+        "generateResponse",
+        `✅ Dokumen berhasil digenerate dan diunduh: ${filename}`
+      );
+    } else {
+      const data = await response.json();
+      showResponse(
+        "generateResponse",
+        `❌ ${data.message || data.error}`,
+        true
+      );
+    }
+  } catch (error) {
+    showResponse(
+      "generateResponse",
+      `❌ Error: ${handleApiError(error)}`,
+      true
+    );
+  }
+}

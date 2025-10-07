@@ -13,25 +13,23 @@ import {
 } from "docx";
 import terbilang from "terbilang";
 
-export const generateDocument = async (req, res, next) => {
+export const generateDocument = async (pks) => {
   try {
     // ============================================================
     // DATA EXTRACTION
     // ============================================================
-    const data = await PKS.findById(req.params.id);
-    if (!data) {
-      return res.status(404).send("PKS not found");
-    }
+
+    const data = pks; // langsung pakai object PKS dari controller
 
     // ============================================================
     // VARIABLE INITIALIZATION
     // Sesuaikan variabel di sini untuk lingkungan baru
     // ============================================================
-    
+
     // Content data
     const content = data.content;
     const tanggal = content.tanggal; // ← Ubah ini sesuai kebutuhan (misal: pks.date)
-    
+
     // Pihak Kedua data
     const pihakKedua = data.pihakKedua;
 
@@ -61,8 +59,9 @@ export const generateDocument = async (req, res, next) => {
       nama: "Dr. Dyah Sugandini, SE, M.Si",
       jabatan: `Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta`,
       skJabatan: `Surat Keputusan Rektor Universitas pembangunan Nasional "Veteran" Yogyakarta Nomor 1569/UN62/KP/2024 tanggal 20 Maret 2024 dalam jabatan tersebut bertindak untuk dan atas nama Universitas Pembangunan Nasional "Veteran" Yogyakarta`,
-      alamat: "Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283",
-      nip: "19710617 202121 2 001"
+      alamat:
+        "Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283",
+      nip: "19710617 202121 2 001",
     };
 
     // Document settings
@@ -162,7 +161,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "Nomor", size: fontSize, bold: true }),
+                            new TextRun({
+                              text: "Nomor",
+                              size: fontSize,
+                              bold: true,
+                            }),
                           ],
                           alignment: AlignmentType.RIGHT,
                         }),
@@ -174,7 +177,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", size: fontSize, bold: true }),
+                            new TextRun({
+                              text: ":",
+                              size: fontSize,
+                              bold: true,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -206,7 +213,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "Nomor", size: fontSize, bold: true }),
+                            new TextRun({
+                              text: "Nomor",
+                              size: fontSize,
+                              bold: true,
+                            }),
                           ],
                           alignment: AlignmentType.RIGHT,
                         }),
@@ -218,7 +229,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", size: fontSize, bold: true }),
+                            new TextRun({
+                              text: ":",
+                              size: fontSize,
+                              bold: true,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -252,13 +267,19 @@ export const generateDocument = async (req, res, next) => {
             // TENTANG
             new Paragraph({
               style: "Normal",
-              children: [new TextRun({ text: "TENTANG", bold: true, size: fontSize })],
+              children: [
+                new TextRun({ text: "TENTANG", bold: true, size: fontSize }),
+              ],
               alignment: AlignmentType.CENTER,
             }),
             new Paragraph({
               style: "Normal",
               children: [
-                new TextRun({ text: `${content.judul}`, bold: true, size: fontSize }),
+                new TextRun({
+                  text: `${content.judul}`,
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -292,7 +313,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "I.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "I.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -304,7 +329,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "Nama", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "Nama",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.LEFT,
                         }),
@@ -316,7 +345,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -374,7 +407,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -432,7 +469,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -490,7 +531,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -529,7 +574,11 @@ export const generateDocument = async (req, res, next) => {
                   bold: false,
                   size: fontSize,
                 }),
-                new TextRun({ text: " PIHAK PERTAMA.", bold: true, size: fontSize }),
+                new TextRun({
+                  text: " PIHAK PERTAMA.",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
             }),
 
@@ -547,7 +596,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "II.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "II.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -559,7 +612,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "Nama", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "Nama",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.LEFT,
                         }),
@@ -571,7 +628,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -603,7 +664,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -631,7 +696,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -663,7 +732,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -691,7 +764,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: ":", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: ":",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -730,7 +807,11 @@ export const generateDocument = async (req, res, next) => {
                   bold: false,
                   size: fontSize,
                 }),
-                new TextRun({ text: " PIHAK KEDUA.", bold: true, size: fontSize }),
+                new TextRun({
+                  text: " PIHAK KEDUA.",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -757,7 +838,11 @@ export const generateDocument = async (req, res, next) => {
               children: [
                 new TextRun({ text: "Pasal 1", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: "TUJUAN KERJASAMA", bold: true, size: fontSize }),
+                new TextRun({
+                  text: "TUJUAN KERJASAMA",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -827,7 +912,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: " ", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -839,7 +928,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "a.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "a.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -871,7 +964,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: " ", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -883,7 +980,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "b.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "b.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -915,7 +1016,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: " ", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -927,7 +1032,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "c.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "c.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -964,7 +1073,11 @@ export const generateDocument = async (req, res, next) => {
               children: [
                 new TextRun({ text: "Pasal 3", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: "PELAKSANAAN", bold: true, size: fontSize }),
+                new TextRun({
+                  text: "PELAKSANAAN",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -991,7 +1104,11 @@ export const generateDocument = async (req, res, next) => {
               children: [
                 new TextRun({ text: "Pasal 4", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: "PELAKSANAAN", bold: true, size: fontSize }),
+                new TextRun({
+                  text: "PELAKSANAAN",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -1009,7 +1126,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "1.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "1.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -1041,7 +1162,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "2.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "2.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -1078,7 +1203,11 @@ export const generateDocument = async (req, res, next) => {
               children: [
                 new TextRun({ text: "Pasal 5", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: "HAK DAN KEWAJIBAN", bold: true, size: fontSize }),
+                new TextRun({
+                  text: "HAK DAN KEWAJIBAN",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -1105,7 +1234,11 @@ export const generateDocument = async (req, res, next) => {
               children: [
                 new TextRun({ text: "Pasal 6", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: "JANGKA WAKTU", bold: true, size: fontSize }),
+                new TextRun({
+                  text: "JANGKA WAKTU",
+                  bold: true,
+                  size: fontSize,
+                }),
               ],
               alignment: AlignmentType.CENTER,
             }),
@@ -1181,7 +1314,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "1.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "1.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -1194,7 +1331,7 @@ export const generateDocument = async (req, res, next) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "Hal-hal yang bersifat melengkapi dan belum diatur dalam Perjanjian Kerjasama ini akan ditentukan kemudian atas dasar persetujuan PARA PIHAK dan akan dibuat "addendum" tersendiri yang merupakan bagian yang tidak terpisahkan dari Perjanjian Kerjasama ini.",
+                              text: `Hal-hal yang bersifat melengkapi dan belum diatur dalam Perjanjian Kerjasama ini akan ditentukan kemudian atas dasar persetujuan PARA PIHAK dan akan dibuat "addendum" tersendiri yang merupakan bagian yang tidak terpisahkan dari Perjanjian Kerjasama ini.`,
                               bold: false,
                               size: fontSize,
                             }),
@@ -1213,7 +1350,11 @@ export const generateDocument = async (req, res, next) => {
                         new Paragraph({
                           style: "Normal",
                           children: [
-                            new TextRun({ text: "2.", bold: false, size: fontSize }),
+                            new TextRun({
+                              text: "2.",
+                              bold: false,
+                              size: fontSize,
+                            }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
@@ -1382,17 +1523,7 @@ export const generateDocument = async (req, res, next) => {
     // RESPONSE GENERATION
     // ============================================================
     const buffer = await Packer.toBuffer(doc);
-
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="pks-${req.params.id}.docx"`
-    );
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    );
-
-    res.end(buffer);
+    return buffer;
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Error generating document");

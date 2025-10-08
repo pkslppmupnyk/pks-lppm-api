@@ -2,466 +2,812 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PKS-LPPM API Documentation</title>
-    <link rel="stylesheet" href="./css/documentation.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - PKS Management System</title>
+    <link rel="stylesheet" href="css/documentation.css">
 </head>
 
 <body>
-    <nav>
-        <h2>📘 Dokumentasi</h2>
-        <ul>
-            <li><a href="#overview">1. Overview</a></li>
-            <li><a href="#setup">2. Setup & Konfigurasi</a></li>
-            <li><a href="#auth">3. Autentikasi</a></li>
-            <li><a href="#models">4. Struktur Database</a></li>
-            <li><a href="#schema">5. Struktur JSON PKS</a></li>
-            <li><a href="#routes">6. Endpoint API</a></li>
-            <li><a href="#generator">7. Generate Dokumen PKS</a></li>
-            <li><a href="#error">8. Error Handling</a></li>
-            <li><a href="#security">9. Keamanan</a></li>
-            <li><a href="#arch">10. Arsitektur Proyek</a></li>
-        </ul>
-    </nav>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>📚 API Docs</h2>
+                <span class="version">v1.0.0</span>
+            </div>
 
-    <main>
-        <section id="overview">
-            <h1>📘 PKS-LPPM API Documentation</h1>
-            <p>API resmi untuk pengelolaan <strong>Perjanjian Kerja Sama (PKS)</strong> LPPM UPN “Veteran” Yogyakarta.
-                Framework: <code>Node.js + Express</code>, database <code>MongoDB</code>, dokumen dibuat otomatis dengan
-                pustaka <code>docx</code>.</p>
-        </section>
+            <div class="nav-section">
+                <h3>Getting Started</h3>
+                <ul>
+                    <li><a href="#overview" class="nav-link">Overview</a></li>
+                    <li><a href="#authentication" class="nav-link">Authentication</a></li>
+                    <li><a href="#base-url" class="nav-link">Base URL</a></li>
+                    <li><a href="#rate-limiting" class="nav-link">Rate Limiting</a></li>
+                </ul>
+            </div>
 
-        <section id="setup">
-            <h2>2. Setup & Konfigurasi</h2>
-            <pre><code># Instalasi
-npm install
+            <div class="nav-section">
+                <h3>Endpoints</h3>
+                <ul>
+                    <li>
+                        <a href="#auth-endpoints" class="nav-link">🔐 Authentication</a>
+                        <ul class="sub-nav">
+                            <li><a href="#register">Register</a></li>
+                            <li><a href="#login">Login</a></li>
+                            <li><a href="#profile">Profile</a></li>
+                            <li><a href="#change-password">Change Password</a></li>
+                            <li><a href="#logout">Logout</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#pks-endpoints" class="nav-link">📄 PKS Management</a>
+                        <ul class="sub-nav">
+                            <li><a href="#create-pks">Create PKS</a></li>
+                            <li><a href="#get-all-pks">Get All PKS</a></li>
+                            <li><a href="#get-pks">Get PKS</a></li>
+                            <li><a href="#update-pks">Update PKS</a></li>
+                            <li><a href="#delete-pks">Delete PKS</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#file-endpoints" class="nav-link">📁 File Operations</a>
+                        <ul class="sub-nav">
+                            <li><a href="#upload-file">Upload File</a></li>
+                            <li><a href="#download-file">Download File</a></li>
+                            <li><a href="#delete-file">Delete File</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#document-endpoints" class="nav-link">📝 Document Generation</a>
+                    </li>
+                </ul>
+            </div>
 
-# File .env.development
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/pksdb
-JWT_SECRET=secretkey
-BASE_URL=http://localhost:5000
+            <div class="nav-section">
+                <h3>Models</h3>
+                <ul>
+                    <li><a href="#admin-model" class="nav-link">Admin Model</a></li>
+                    <li><a href="#pks-model" class="nav-link">PKS Model</a></li>
+                </ul>
+            </div>
+        </nav>
 
-# Jalankan server
-npm run dev</code></pre>
-            <p>Dapat diakses melalui <code>http://localhost:5000/api</code></p>
-        </section>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1>PKS Management System API Documentation</h1>
+                <p>Complete REST API documentation for PKS (Perjanjian Kerja Sama) Management System</p>
+            </header>
 
-        <section id="auth">
-            <h2>3. Autentikasi</h2>
-            <p>Sistem hanya memiliki satu entitas pengguna, yaitu <strong>Admin</strong>.
-                Admin login melalui email & password, mendapatkan token JWT untuk otorisasi endpoint lainnya.</p>
+            <!-- Overview Section -->
+            <section id="overview" class="content-section">
+                <h2>Overview</h2>
+                <div class="info-box">
+                    <p>PKS Management System API provides endpoints for managing cooperation agreements (PKS), including
+                        CRUD operations, file management, and document generation.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>✅ JWT Authentication</li>
+                            <li>✅ Auto-numbering for PKS documents</li>
+                            <li>✅ PDF file upload/download (max 10MB)</li>
+                            <li>✅ Document generation (.docx format)</li>
+                            <li>✅ Rate limiting for security</li>
+                            <li>✅ Role-based access control</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
 
-            <h3>Endpoint Autentikasi</h3>
-            <table>
-                <tr>
-                    <th>Method</th>
-                    <th>Endpoint</th>
-                    <th>Akses</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/register</td>
-                    <td>Public</td>
-                    <td>Daftarkan admin baru (hanya digunakan saat setup awal)</td>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/login</td>
-                    <td>Public</td>
-                    <td>Login admin dan dapatkan JWT token</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/auth/me</td>
-                    <td>Admin</td>
-                    <td>Ambil data admin yang sedang login</td>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/logout</td>
-                    <td>Admin</td>
-                    <td>Logout dan hapus sesi aktif</td>
-                </tr>
-                <tr>
-                    <td>PATCH</td>
-                    <td>/api/auth/change-password</td>
-                    <td>Admin</td>
-                    <td>Ganti password akun admin</td>
-                </tr>
-            </table>
-        </section>
+            <!-- Base URL Section -->
+            <section id="base-url" class="content-section">
+                <h2>Base URL</h2>
+                <div class="code-block">
+                    <code>http://localhost:3000/api</code>
+                    <button class="copy-btn" onclick="copyToClipboard('http://localhost:3000/api')">Copy</button>
+                </div>
+                <p class="note">All API endpoints are prefixed with <code>/api</code></p>
+            </section>
 
-        <section id="models">
-            <h2>4. Struktur Database</h2>
-            <h3>Admin Model</h3>
-            <table>
-                <tr>
-                    <th>Field</th>
-                    <th>Tipe</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>username</td>
-                    <td>String</td>
-                    <td>Nama login unik (minimal 3 karakter)</td>
-                </tr>
-                <tr>
-                    <td>email</td>
-                    <td>String</td>
-                    <td>Email unik (disimpan lowercase)</td>
-                </tr>
-                <tr>
-                    <td>password</td>
-                    <td>String</td>
-                    <td>Password terenkripsi (bcrypt hash)</td>
-                </tr>
-                <tr>
-                    <td>nama</td>
-                    <td>String</td>
-                    <td>Nama lengkap admin</td>
-                </tr>
-                <tr>
-                    <td>isActive</td>
-                    <td>Boolean</td>
-                    <td>Status akun (default: true)</td>
-                </tr>
-                <tr>
-                    <td>createdAt</td>
-                    <td>Date</td>
-                    <td>Tanggal dibuat otomatis</td>
-                </tr>
-                <tr>
-                    <td>updatedAt</td>
-                    <td>Date</td>
-                    <td>Tanggal terakhir diubah otomatis</td>
-                </tr>
-            </table>
+            <!-- Authentication Section -->
+            <section id="authentication" class="content-section">
+                <h2>Authentication</h2>
+                <div class="info-box">
+                    <p>This API uses JWT (JSON Web Token) for authentication. Include the token in the Authorization
+                        header:</p>
+                    <div class="code-block">
+                        <code>Authorization: Bearer YOUR_JWT_TOKEN</code>
+                    </div>
+                    <p class="note">⚠️ Protected routes require valid JWT token</p>
+                </div>
+            </section>
 
-            <h3>PKS Model</h3>
-            <table>
-                <tr>
-                    <th>Bagian</th>
-                    <th>Field</th>
-                    <th>Tipe</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td rowspan="4">content</td>
-                    <td>nomor</td>
-                    <td>String</td>
-                    <td>Nomor PKS unik</td>
-                </tr>
-                <tr>
-                    <td>judul</td>
-                    <td>String</td>
-                    <td>Judul perjanjian</td>
-                </tr>
-                <tr>
-                    <td>tanggal</td>
-                    <td>Date</td>
-                    <td>Tanggal penandatanganan</td>
-                </tr>
-                <tr>
-                    <td>tanggalKadaluarsa</td>
-                    <td>Date</td>
-                    <td>Tanggal berakhir PKS</td>
-                </tr>
-                <tr>
-                    <td rowspan="6">pihakKedua</td>
-                    <td>instansi</td>
-                    <td>String</td>
-                    <td>Nama lembaga mitra</td>
-                </tr>
-                <tr>
-                    <td>nama</td>
-                    <td>String</td>
-                    <td>Nama penandatangan</td>
-                </tr>
-                <tr>
-                    <td>jabatan</td>
-                    <td>String</td>
-                    <td>Jabatan pihak kedua</td>
-                </tr>
-                <tr>
-                    <td>alamat</td>
-                    <td>String</td>
-                    <td>Alamat instansi</td>
-                </tr>
-                <tr>
-                    <td>nomor</td>
-                    <td>String</td>
-                    <td>Nomor telepon</td>
-                </tr>
-                <tr>
-                    <td>email</td>
-                    <td>String</td>
-                    <td>Email kontak</td>
-                </tr>
-            </table>
-        </section>
+            <!-- Rate Limiting Section -->
+            <section id="rate-limiting" class="content-section">
+                <h2>Rate Limiting</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Endpoint Type</th>
+                                <th>Limit</th>
+                                <th>Window</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Authentication (login/register)</td>
+                                <td>5 requests</td>
+                                <td>15 minutes</td>
+                            </tr>
+                            <tr>
+                                <td>General API</td>
+                                <td>100 requests</td>
+                                <td>15 minutes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-        <section id="schema">
-            <h2>5. Struktur JSON PKS</h2>
-            <pre><code>{
+            <!-- Authentication Endpoints -->
+            <section id="auth-endpoints" class="content-section">
+                <h2>🔐 Authentication Endpoints</h2>
+
+                <!-- Register Endpoint -->
+                <div id="register" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/auth/register</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Register a new admin account</p>
+
+                        <h4>Request Body:</h4>
+                        <div class="code-block">
+                            <pre>{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "securePassword123",
+  "nama": "John Doe"
+}</pre>
+                        </div>
+
+                        <h4>Response (201 Created):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "success": true,
+  "message": "Admin berhasil didaftarkan",
+  "data": {
+    "id": "507f1f77bcf86cd799439011",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "nama": "John Doe",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}</pre>
+                        </div>
+
+                        <h4>Validation Rules:</h4>
+                        <ul class="validation-list">
+                            <li>Username: min 3 characters, alphanumeric and underscore only</li>
+                            <li>Email: valid email format</li>
+                            <li>Password: min 6 characters</li>
+                            <li>Nama: required, not empty</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Login Endpoint -->
+                <div id="login" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/auth/login</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Login with username and password</p>
+
+                        <h4>Request Body:</h4>
+                        <div class="code-block">
+                            <pre>{
+  "username": "johndoe",
+  "password": "securePassword123"
+}</pre>
+                        </div>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "success": true,
+  "message": "Login berhasil",
+  "data": {
+    "id": "507f1f77bcf86cd799439011",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "nama": "John Doe",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Endpoint -->
+                <div id="profile" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/auth/me</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Get current admin profile</p>
+
+                        <h4>Headers:</h4>
+                        <div class="code-block">
+                            <pre>Authorization: Bearer YOUR_JWT_TOKEN</pre>
+                        </div>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "success": true,
+  "data": {
+    "id": "507f1f77bcf86cd799439011",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "nama": "John Doe",
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change Password Endpoint -->
+                <div id="change-password" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-patch">PATCH</span>
+                        <span class="endpoint-path">/auth/change-password</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Change admin password</p>
+
+                        <h4>Request Body:</h4>
+                        <div class="code-block">
+                            <pre>{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}</pre>
+                        </div>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "success": true,
+  "message": "Password berhasil diubah"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Endpoint -->
+                <div id="logout" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/auth/logout</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Logout current admin</p>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "success": true,
+  "message": "Logout berhasil"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PKS Endpoints -->
+            <section id="pks-endpoints" class="content-section">
+                <h2>📄 PKS Management Endpoints</h2>
+
+                <!-- Create PKS -->
+                <div id="create-pks" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/pks</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Create a new PKS document with auto-generated number</p>
+
+                        <h4>Request Body:</h4>
+                        <div class="code-block">
+                            <pre>{
   "content": {
-    "judul": "Kerja Sama Pengembangan Riset",
-    "tanggal": "2025-10-07T00:00:00Z",
-    "tanggalKadaluarsa": "2026-10-07T00:00:00Z"
+    "judul": "Kerjasama Pengembangan Sistem",
+    "tanggal": "2024-01-15",
+    "tanggalKadaluarsa": "2025-01-15"
   },
   "pihakKedua": {
-    "instansi": "Universitas Gadjah Mada",
-    "nama": "Prof. Dr. Andi Wijaya",
-    "jabatan": "Rektor",
-    "alamat": "Jl. Kaliurang No. 1, Sleman, Yogyakarta",
-    "email": "andi.wijaya@ugm.ac.id"
+    "instansi": "PT. Technology Indonesia",
+    "nama": "Budi Santoso",
+    "jabatan": "Direktur Utama",
+    "alamat": "Jl. Sudirman No. 123, Jakarta",
+    "nomor": "001/DIR/2024"
+  },
+  "properties": {
+    "status": "draft",
+    "comment": "Initial draft",
+    "email": "admin@techindo.com",
+    "reminderDate": "2024-12-15"
   }
-}</code></pre>
-        </section>
+}</pre>
+                        </div>
 
-        <section id="routes">
-            <h2>6. Endpoint API Lengkap</h2>
+                        <h4>Response (201 Created):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "PKS created successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "content": {
+      "nomor": "PKS-2024-0001",
+      "judul": "Kerjasama Pengembangan Sistem",
+      "tanggal": "2024-01-15T00:00:00.000Z",
+      "tanggalKadaluarsa": "2025-01-15T00:00:00.000Z"
+    },
+    "pihakKedua": { ... },
+    "properties": { ... },
+    "fileUpload": {
+      "docName": "",
+      "fileName": ""
+    },
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
 
-            <h3>📄 PKS Routes</h3>
-            <table>
-                <tr>
-                    <th>Method</th>
-                    <th>Endpoint</th>
-                    <th>Akses</th>
-                    <th>Controller</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/pks</td>
-                    <td>Public</td>
-                    <td>createPKS</td>
-                    <td>Ajukan PKS baru</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/pks</td>
-                    <td>Public</td>
-                    <td>getAllPKS</td>
-                    <td>Ambil semua PKS</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/pks/:nomor</td>
-                    <td>Public</td>
-                    <td>getPKSByNomor</td>
-                    <td>Ambil detail PKS berdasarkan nomor</td>
-                </tr>
-                <tr>
-                    <td>PATCH</td>
-                    <td>/api/pks/:nomor</td>
-                    <td>Admin</td>
-                    <td>updatePKSByNomor</td>
-                    <td>Ubah data PKS berdasarkan nomor</td>
-                </tr>
-                <tr>
-                    <td>DELETE</td>
-                    <td>/api/pks/:nomor</td>
-                    <td>Admin</td>
-                    <td>deletePKSByNomor</td>
-                    <td>Hapus PKS berdasarkan nomor</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/pks/id/:id</td>
-                    <td>Admin</td>
-                    <td>getPKSById</td>
-                    <td>Ambil detail PKS berdasarkan ObjectId</td>
-                </tr>
-                <tr>
-                    <td>PATCH</td>
-                    <td>/api/pks/id/:id</td>
-                    <td>Admin</td>
-                    <td>updatePKS</td>
-                    <td>Ubah data PKS berdasarkan ObjectId</td>
-                </tr>
-                <tr>
-                    <td>DELETE</td>
-                    <td>/api/pks/id/:id</td>
-                    <td>Admin</td>
-                    <td>deletePKS</td>
-                    <td>Hapus PKS berdasarkan ObjectId</td>
-                </tr>
-            </table>
+                <!-- Get All PKS -->
+                <div id="get-all-pks" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/pks</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Get all PKS documents with pagination</p>
 
-            <h3>📂 File & Dokumen Routes</h3>
-            <table>
-                <tr>
-                    <th>Method</th>
-                    <th>Endpoint</th>
-                    <th>Akses</th>
-                    <th>Controller</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/pks/:nomor/file</td>
-                    <td>Public</td>
-                    <td>uploadFile</td>
-                    <td>Upload dokumen/lampiran PKS</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/pks/:nomor/file</td>
-                    <td>Public</td>
-                    <td>downloadFile</td>
-                    <td>Unduh file PKS</td>
-                </tr>
-                <tr>
-                    <td>DELETE</td>
-                    <td>/api/pks/:nomor/file</td>
-                    <td>Admin</td>
-                    <td>deleteFile</td>
-                    <td>Hapus file PKS</td>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/pks/:nomor/generate</td>
-                    <td>Admin</td>
-                    <td>generatePKSDocument</td>
-                    <td>Generate dokumen resmi PKS (.docx)</td>
-                </tr>
-            </table>
+                        <h4>Query Parameters:</h4>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Default</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>status</td>
+                                        <td>String</td>
+                                        <td>-</td>
+                                        <td>Filter by status (draft, menunggu dokumen, menunggu review, approved,
+                                            rejected)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>page</td>
+                                        <td>Number</td>
+                                        <td>1</td>
+                                        <td>Page number</td>
+                                    </tr>
+                                    <tr>
+                                        <td>limit</td>
+                                        <td>Number</td>
+                                        <td>10</td>
+                                        <td>Items per page</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-            <h3>🔐 Autentikasi Routes</h3>
-            <table>
-                <tr>
-                    <th>Method</th>
-                    <th>Endpoint</th>
-                    <th>Akses</th>
-                    <th>Controller</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/register</td>
-                    <td>Public</td>
-                    <td>register</td>
-                    <td>Registrasi admin</td>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/login</td>
-                    <td>Public</td>
-                    <td>login</td>
-                    <td>Login admin</td>
-                </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/auth/me</td>
-                    <td>Admin</td>
-                    <td>getMe</td>
-                    <td>Data admin login</td>
-                </tr>
-                <tr>
-                    <td>POST</td>
-                    <td>/api/auth/logout</td>
-                    <td>Admin</td>
-                    <td>logout</td>
-                    <td>Logout</td>
-                </tr>
-                <tr>
-                    <td>PATCH</td>
-                    <td>/api/auth/change-password</td>
-                    <td>Admin</td>
-                    <td>changePassword</td>
-                    <td>Ganti password admin</td>
-                </tr>
-            </table>
-        </section>
+                        <h4>Example Request:</h4>
+                        <div class="code-block">
+                            <code>GET /api/pks?status=approved&page=1&limit=20</code>
+                        </div>
 
-        <section id="generator">
-            <h2>7. Generate Dokumen PKS</h2>
-            <p><code>documentGenerator.service.js</code> membentuk file <strong>.docx</strong> berdasarkan data dari
-                model PKS.</p>
-            <pre><code>POST /api/pks/:nomor/generate</code></pre>
-            <p><strong>Response:</strong></p>
-            <pre><code>{
-  "success": true,
-  "message": "Dokumen PKS berhasil dibuat",
-  "path": "/file/generated/pks_2025_001.docx"
-}</code></pre>
-        </section>
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "data": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "content": { ... },
+      "pihakKedua": { ... },
+      "properties": { ... }
+    }
+  ],
+  "pagination": {
+    "total": 50,
+    "page": 1,
+    "limit": 20
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
 
-        <section id="error">
-            <h2>8. Error Handling</h2>
-            <table>
-                <tr>
-                    <th>Kode</th>
-                    <th>Pesan</th>
-                    <th>Deskripsi</th>
-                </tr>
-                <tr>
-                    <td>400</td>
-                    <td>Validation Error</td>
-                    <td>Input tidak valid</td>
-                </tr>
-                <tr>
-                    <td>401</td>
-                    <td>Unauthorized</td>
-                    <td>Token tidak valid</td>
-                </tr>
-                <tr>
-                    <td>403</td>
-                    <td>Forbidden</td>
-                    <td>Akses ditolak (bukan admin)</td>
-                </tr>
-                <tr>
-                    <td>404</td>
-                    <td>Not Found</td>
-                    <td>Data tidak ditemukan</td>
-                </tr>
-                <tr>
-                    <td>500</td>
-                    <td>Server Error</td>
-                    <td>Kesalahan server</td>
-                </tr>
-            </table>
-        </section>
+                <!-- Get PKS by Nomor -->
+                <div id="get-pks" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/pks/:nomor</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Get PKS document by nomor</p>
 
-        <section id="security">
-            <h2>9. Keamanan</h2>
-            <ul>
-                <li>Gunakan HTTPS untuk produksi.</li>
-                <li>Token JWT dikirim via header Authorization.</li>
-                <li>Rate limiter aktif pada endpoint login & register.</li>
-                <li>CORS diatur hanya untuk domain resmi frontend.</li>
-            </ul>
-        </section>
+                        <h4>Path Parameters:</h4>
+                        <ul>
+                            <li><code>nomor</code> - PKS document number (e.g., PKS-2024-0001)</li>
+                        </ul>
 
-        <section id="arch">
-            <h2>10. Arsitektur Proyek</h2>
-            <pre><code>server.js
- ├── routes/
- │    ├── auth.routes.js → Auth Controller → Admin Model
- │    └── pks.routes.js  → PKS Controller  → PKS Model
- ├── controllers/
- │    ├── auth.controller.js
- │    ├── pks.controller.js
- │    ├── document.controller.js
- │    └── file.controller.js
- ├── services/documentGenerator.service.js
- ├── middleware/
- │    ├── auth.middleware.js
- │    ├── upload.middleware.js
- │    ├── validation.middleware.js
- │    └── rateLimiter.middleware.js
- └── public/
-      ├── documentation.html
-      ├── upload_test.html
-      ├── css/
-      └── js/
-</code></pre>
-        </section>
-    </main>
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>GET /api/pks/byid/:id</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update PKS -->
+                <div id="update-pks" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-patch">PATCH</span>
+                        <span class="endpoint-path">/pks/:nomor</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Update PKS document</p>
+
+                        <h4>Request Body:</h4>
+                        <div class="code-block">
+                            <pre>{
+  "properties": {
+    "status": "approved",
+    "comment": "Approved by director"
+  }
+}</pre>
+                        </div>
+
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>PATCH /api/pks/byid/:id</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete PKS -->
+                <div id="delete-pks" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-delete">DELETE</span>
+                        <span class="endpoint-path">/pks/:nomor</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Delete PKS document and associated files</p>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "PKS and associated file deleted successfully",
+  "nomor": "PKS-2024-0001"
+}</pre>
+                        </div>
+
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>DELETE /api/pks/byid/:id</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Operations -->
+            <section id="file-endpoints" class="content-section">
+                <h2>📁 File Operations</h2>
+
+                <!-- Upload File -->
+                <div id="upload-file" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/pks/:nomor/file</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Upload PDF file for PKS document</p>
+
+                        <h4>Request:</h4>
+                        <ul>
+                            <li>Content-Type: <code>multipart/form-data</code></li>
+                            <li>Field name: <code>file</code></li>
+                            <li>Max size: <code>10MB</code></li>
+                            <li>Allowed type: <code>PDF only</code></li>
+                        </ul>
+
+                        <h4>cURL Example:</h4>
+                        <div class="code-block">
+                            <pre>curl -X POST http://localhost:3000/api/pks/PKS-2024-0001/file \
+  -F "file=@/path/to/document.pdf"</pre>
+                        </div>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "File uploaded successfully",
+  "data": {
+    "nomor": "PKS-2024-0001",
+    "docName": "document.pdf",
+    "fileName": "uploadedfile_PKS-2024-0001.pdf"
+  }
+}</pre>
+                        </div>
+
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>POST /api/pks/byid/:id/file</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download File -->
+                <div id="download-file" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/pks/:nomor/file</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Download PDF file for PKS document</p>
+
+                        <h4>Response:</h4>
+                        <p>Binary PDF file with appropriate headers for download</p>
+
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>GET /api/pks/byid/:id/file</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete File -->
+                <div id="delete-file" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-delete">DELETE</span>
+                        <span class="endpoint-path">/pks/:nomor/file</span>
+                        <span class="badge badge-protected">Protected</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Delete uploaded file for PKS document</p>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "File deleted successfully",
+  "nomor": "PKS-2024-0001"
+}</pre>
+                        </div>
+
+                        <h4>Alternative Endpoint (by ID):</h4>
+                        <div class="code-block">
+                            <code>DELETE /api/pks/byid/:id/file</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Document Generation -->
+            <section id="document-endpoints" class="content-section">
+                <h2>📝 Document Generation</h2>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/pks/:nomor/generate</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Generate PKS document in .docx format</p>
+
+                        <h4>Response:</h4>
+                        <p>Binary .docx file with complete PKS agreement content</p>
+
+                        <h4>Generated Document Includes:</h4>
+                        <ul>
+                            <li>Agreement header with both parties information</li>
+                            <li>Auto-formatted date in Indonesian format</li>
+                            <li>Complete agreement articles (Pasal 1-8)</li>
+                            <li>Signature placeholders</li>
+                        </ul>
+
+                        <h4>Example Usage:</h4>
+                        <div class="code-block">
+                            <pre>// Browser download
+window.location.href = '/api/pks/PKS-2024-0001/generate';
+
+// Or with fetch
+fetch('/api/pks/PKS-2024-0001/generate')
+  .then(response => response.blob())
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'PKS-2024-0001.docx';
+    a.click();
+  });</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Models Section -->
+            <section id="admin-model" class="content-section">
+                <h2>Admin Model</h2>
+                <div class="code-block">
+                    <pre>{
+  "username": "String (required, unique, min: 3)",
+  "email": "String (required, unique, lowercase)",
+  "password": "String (required, min: 6, hashed)",
+  "nama": "String (required)",
+  "isActive": "Boolean (default: true)",
+  "createdAt": "Date (auto)",
+  "updatedAt": "Date (auto)"
+}</pre>
+                </div>
+            </section>
+
+            <section id="pks-model" class="content-section">
+                <h2>PKS Model</h2>
+                <div class="code-block">
+                    <pre>{
+  "content": {
+    "nomor": "String (unique, immutable, auto-generated)",
+    "judul": "String (required)",
+    "tanggal": "Date (required)",
+    "tanggalKadaluarsa": "Date"
+  },
+  "pihakKedua": {
+    "instansi": "String (required)",
+    "nama": "String (required)",
+    "jabatan": "String (required)",
+    "alamat": "String (required)",
+    "nomor": "String"
+  },
+  "properties": {
+    "uploadDate": "Date (default: now)",
+    "status": "String (enum: draft, menunggu dokumen, menunggu review, approved, rejected)",
+    "comment": "String",
+    "email": "String (required, valid email)",
+    "reminderDate": "Date",
+    "notificationsSent": "Number (default: 0)",
+    "lastNotificationDate": "Date",
+    "isReminderActive": "Boolean (default: true)"
+  },
+  "fileUpload": {
+    "docName": "String (original filename)",
+    "fileName": "String (server filename)"
+  },
+  "createdAt": "Date (auto)",
+  "updatedAt": "Date (auto)"
+}</pre>
+                </div>
+            </section>
+
+            <!-- Error Responses -->
+            <section class="content-section">
+                <h2>Error Responses</h2>
+                <div class="info-box error-box">
+                    <h4>Common HTTP Status Codes:</h4>
+                    <ul>
+                        <li><strong>400 Bad Request</strong> - Invalid request data or validation error</li>
+                        <li><strong>401 Unauthorized</strong> - Missing or invalid authentication token</li>
+                        <li><strong>404 Not Found</strong> - Resource not found</li>
+                        <li><strong>429 Too Many Requests</strong> - Rate limit exceeded</li>
+                        <li><strong>500 Internal Server Error</strong> - Server error</li>
+                    </ul>
+
+                    <h4>Error Response Format:</h4>
+                    <div class="code-block">
+                        <pre>{
+  "success": false,
+  "message": "Error description",
+  "error": "Detailed error message (in development)",
+  "errors": [  // For validation errors
+    {
+      "field": "email",
+      "message": "Email tidak valid"
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>PKS Management System API v1.0.0 | © 2024 LPPM UPN Veteran Yogyakarta</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Update active state
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Highlight current section on scroll
+        const observerOptions = {
+            root: null,
+            rootMargin: '-100px 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    const link = document.querySelector(`.nav-link[href="#${id}"]`);
+                    if (link) {
+                        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section[id]').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
 </body>
 
 </html>

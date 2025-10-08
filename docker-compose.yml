@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: pks-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - MONGODB_URI=mongodb://mongo:27017/pksdb
+      - UPLOAD_DIR=/app/uploads/pks
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=7d
+      - CLIENT_URL=${CLIENT_URL}
+    volumes:
+      # Persistent storage untuk file uploads
+      - uploads-data:/app/uploads
+      # Optional: untuk development
+      # - ./:/app
+      # - /app/node_modules
+    networks:
+      - pks-network
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    container_name: pks-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: pksdb
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - pks-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/pksdb --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  pks-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  uploads-data:

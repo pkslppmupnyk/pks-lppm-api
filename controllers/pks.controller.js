@@ -124,9 +124,40 @@ export const updatePKSByNomor = async (req, res) => {
         .json({ message: "PKS not found with nomor: " + nomor });
     }
 
+    // 🛡️ SOLUSI TERBAIK: Hapus nomor dari updateData untuk mencegah overwrite
+    if (updateData.content && updateData.content.nomor) {
+      delete updateData.content.nomor; // Jangan izinkan update nomor sama sekali
+    }
+
+    // Lalu gunakan $set untuk nested fields
+    const updateQuery = {};
+    
+    // Update content fields (kecuali nomor)
+    if (updateData.content) {
+      Object.keys(updateData.content).forEach(key => {
+        if (key !== 'nomor') {
+          updateQuery[`content.${key}`] = updateData.content[key];
+        }
+      });
+    }
+    
+    // Update pihakKedua
+    if (updateData.pihakKedua) {
+      Object.keys(updateData.pihakKedua).forEach(key => {
+        updateQuery[`pihakKedua.${key}`] = updateData.pihakKedua[key];
+      });
+    }
+    
+    // Update properties
+    if (updateData.properties) {
+      Object.keys(updateData.properties).forEach(key => {
+        updateQuery[`properties.${key}`] = updateData.properties[key];
+      });
+    }
+
     const updated = await PKS.findByIdAndUpdate(
       pks._id,
-      { $set: updateData },
+      { $set: updateQuery },
       { new: true, runValidators: true }
     );
 

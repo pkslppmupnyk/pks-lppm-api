@@ -167,6 +167,39 @@ export const updatePKSByNomor = async (req, res) => {
   }
 };
 
+// SUBMIT FOR REVIEW (PUBLIC)
+export const submitForReview = async (req, res) => {
+  try {
+    const { nomor } = req.params;
+    const pks = await findPKSByNomor(nomor);
+
+    if (!pks) {
+      return res
+        .status(404)
+        .json({ message: "PKS not found with nomor: " + nomor });
+    }
+
+    // Validasi: Hanya bisa di-submit jika statusnya "menunggu dokumen"
+    if (pks.properties.status !== "menunggu dokumen") {
+      return res
+        .status(400)
+        .json({
+          message: `Cannot submit for review. Current status is '${pks.properties.status}'.`,
+        });
+    }
+
+    pks.properties.status = "menunggu review";
+    const updatedPks = await pks.save();
+
+    res.json({
+      message: "PKS successfully submitted for review.",
+      data: updatedPks,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // DELETE by NOMOR
 export const deletePKSByNomor = async (req, res) => {
   try {

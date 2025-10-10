@@ -6,6 +6,7 @@ import {
   getAllPKS,
   getPKSByNomor,
   updatePKSByNomor,
+  submitForReview,
   deletePKSByNomor,
   getPKSById,
   updatePKS,
@@ -44,6 +45,9 @@ pksRouter.get("/", getAllPKS);
 
 // READ - Detail PKS by Nomor (PUBLIC)
 pksRouter.get("/:nomor", getPKSByNomor);
+
+// SUBMIT FOR REVIEW - Ubah status dari 'menunggu dokumen' ke 'menunggu review' (PUBLIC)
+pksRouter.post("/:nomor/submit-review", submitForReview);
 
 // UPDATE - Update PKS by Nomor (ADMIN ONLY)
 pksRouter.patch("/:nomor", protect, updatePKSByNomor);

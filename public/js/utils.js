@@ -6,7 +6,7 @@ const API_CONFIG = {
 
   // Production (uncomment jika deploy)
   // BASE_URL: 'http://192.168.1.100:5000/api/pks',
-  BASE_URL: 'http://148.230.98.39:8080/api/pks',
+  BASE_URL: 'https://api.pkslppmupnyk.io/api/pks',
 };
 
 // ==================== Helper Functions ====================

@@ -43,10 +43,10 @@ export const createPKS = async (req, res) => {
 
     // 3. Jika validasi OK, baru generate nomor
     const seq = await DocNumber.getNextSeq("PKS");
-    const nomor = `PKS-${new Date().getFullYear()}-${String(seq).padStart(
-      4,
-      "0"
-    )}`;
+    const year = new Date().getFullYear();
+
+    // Format nomor baru sesuai permintaan
+    const nomor = `${seq}/UN62.21/KS.00.00/${year}`;
 
     // 4. Set nomor yang benar
     pksTemp.content.nomor = nomor;
@@ -131,26 +131,26 @@ export const updatePKSByNomor = async (req, res) => {
 
     // Lalu gunakan $set untuk nested fields
     const updateQuery = {};
-    
+
     // Update content fields (kecuali nomor)
     if (updateData.content) {
-      Object.keys(updateData.content).forEach(key => {
-        if (key !== 'nomor') {
+      Object.keys(updateData.content).forEach((key) => {
+        if (key !== "nomor") {
           updateQuery[`content.${key}`] = updateData.content[key];
         }
       });
     }
-    
+
     // Update pihakKedua
     if (updateData.pihakKedua) {
-      Object.keys(updateData.pihakKedua).forEach(key => {
+      Object.keys(updateData.pihakKedua).forEach((key) => {
         updateQuery[`pihakKedua.${key}`] = updateData.pihakKedua[key];
       });
     }
-    
+
     // Update properties
     if (updateData.properties) {
-      Object.keys(updateData.properties).forEach(key => {
+      Object.keys(updateData.properties).forEach((key) => {
         updateQuery[`properties.${key}`] = updateData.properties[key];
       });
     }

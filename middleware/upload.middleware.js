@@ -18,21 +18,23 @@ const storage = multer.diskStorage({
       let pksNomor = nomor;
       let existingPks = null;
 
-      // Jika menggunakan ID, cari nomor PKS-nya dulu
       if (id && !nomor) {
         existingPks = await PKS.findById(id);
         if (existingPks) {
           pksNomor = existingPks.content.nomor;
         }
       } else if (nomor) {
-        // Jika menggunakan nomor, cari PKS-nya untuk mendapatkan info file lama
         existingPks = await PKS.findOne({ "content.nomor": nomor });
       }
 
-      const ext = path.extname(file.originalname);
-      const filename = `uploadedfile_${pksNomor}${ext}`;
+      // --- PERUBAHAN UTAMA DI SINI ---
+      // Ganti semua karakter '/' dengan '-' agar aman untuk nama file
+      const sanitizedNomor = pksNomor.replace(/\//g, "-");
+      // ---------------------------------
 
-      // Hapus file lama jika ada sebelum membuat file baru
+      const ext = path.extname(file.originalname);
+      const filename = `uploadedfile_${sanitizedNomor}${ext}`;
+
       if (existingPks && existingPks.fileUpload.fileName) {
         const oldFilePath = path.join(
           __dirname,
@@ -40,8 +42,8 @@ const storage = multer.diskStorage({
           existingPks.fileUpload.fileName
         );
         try {
-          await fs.access(oldFilePath); // Check if file exists
-          await fs.unlink(oldFilePath); // Delete old file
+          await fs.access(oldFilePath);
+          await fs.unlink(oldFilePath);
           console.log(`Deleted old file: ${existingPks.fileUpload.fileName}`);
         } catch (err) {
           console.log(

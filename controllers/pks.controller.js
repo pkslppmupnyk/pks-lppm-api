@@ -18,7 +18,7 @@ const deleteFileFromServer = async (fileName) => {
   if (!fileName) return;
 
   try {
-    const filePath = path.join(__dirname, "../file", fileName);
+    const filePath = path.join(__dirname, "../uploads/scan_pks", fileName);
     await fs.unlink(filePath);
     console.log(`File deleted: ${fileName}`);
   } catch (err) {

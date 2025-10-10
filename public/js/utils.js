@@ -2,11 +2,11 @@
 // Ubah ini sesuai dengan URL backend Anda
 const API_CONFIG = {
   // Development
-  BASE_URL: "http://localhost:5000/api/pks",
+  // BASE_URL: "http://localhost:5000/api/pks",
 
   // Production (uncomment jika deploy)
   // BASE_URL: 'http://192.168.1.100:5000/api/pks',
-  // BASE_URL: 'https://your-domain.com/api/pks',
+  BASE_URL: 'http://148.230.98.39:8080/api/pks',
 };
 
 // ==================== Helper Functions ====================

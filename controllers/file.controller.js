@@ -96,7 +96,7 @@ export const downloadFile = async (req, res) => {
       return res.status(404).json({ message: "No file uploaded for this PKS" });
     }
 
-    const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
+    const filePath = path.join(__dirname, "../uploads/scan_pks", pks.fileUpload.fileName);
 
     // Cek apakah file exists
     try {
@@ -136,7 +136,7 @@ export const deleteFile = async (req, res) => {
     }
 
     // Hapus file dari folder
-    const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
+    const filePath = path.join(__dirname, "../uploads/scan_pks", pks.fileUpload.fileName);
     try {
       await fs.unlink(filePath);
       console.log(`File deleted: ${filePath}`);
@@ -237,7 +237,7 @@ export const downloadFileById = async (req, res) => {
       return res.status(404).json({ message: "No file uploaded for this PKS" });
     }
 
-    const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
+    const filePath = path.join(__dirname, "../uploads/scan_pks", pks.fileUpload.fileName);
 
     // Cek apakah file exists
     try {
@@ -275,7 +275,7 @@ export const deleteFileById = async (req, res) => {
     }
 
     // Hapus file dari folder
-    const filePath = path.join(__dirname, "../file", pks.fileUpload.fileName);
+    const filePath = path.join(__dirname, "../uploads/scan_pks", pks.fileUpload.fileName);
     try {
       await fs.unlink(filePath);
       console.log(`File deleted: ${filePath}`);

@@ -13,7 +13,7 @@ RUN npm ci --only=production
 COPY . .
 
 # Create uploads directory
-RUN mkdir -p uploads/pks
+RUN mkdir -p uploads/scan_pks
 
 # Expose port
 EXPOSE 8080

@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 // Konfigurasi storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../file"));
+    cb(null, path.join(__dirname, "../uploads/scan_pks"));
   },
   filename: async (req, file, cb) => {
     try {
@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
       if (existingPks && existingPks.fileUpload.fileName) {
         const oldFilePath = path.join(
           __dirname,
-          "../file",
+          "../uploads/scan_pks",
           existingPks.fileUpload.fileName
         );
         try {

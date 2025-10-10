@@ -21,6 +21,7 @@ import { authLimiter } from "../middleware/rateLimiter.middleware.js";
 // Public routes
 authRouter.post(
   "/register",
+  protect,
   authLimiter,
   registerValidation,
   validate,

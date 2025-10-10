@@ -21,6 +21,12 @@ import {
   deleteFileById,
 } from "../controllers/file.controller.js";
 
+import {
+  startReminder,
+  stopReminder,
+  sendStatusNotification,
+} from "../controllers/email.controller.js";
+
 import { generatePKSDocument } from "../controllers/document.controller.js";
 
 import upload from "../middleware/upload.middleware.js";
@@ -80,5 +86,16 @@ pksRouter.get("/byid/:id/file", downloadFileById);
 
 // DELETE - Hapus file by ID (ADMIN ONLY)
 pksRouter.delete("/byid/:id/file", protect, deleteFileById);
+
+// ==================== EMAIL & REMINDER OPERATIONS (PUBLIC) ====================
+
+// START Reminder by ID
+pksRouter.post("/byid/:id/reminders/start", startReminder);
+
+// STOP Reminder by ID
+pksRouter.post("/byid/:id/reminders/stop", stopReminder);
+
+// Send Status Change Notification by ID
+pksRouter.post("/byid/:id/status-notification", sendStatusNotification);
 
 export default pksRouter;

@@ -11,6 +11,9 @@ dotenv.config();
 import pksRouter from "./routes/pks.routes.js";
 import authRouter from "./routes/auth.routes.js";
 
+// cron
+import { startReminderCronJob } from "./services/cron.service.js";
+
 //database
 import connectDB from "./config/database.js";
 connectDB();
@@ -18,10 +21,10 @@ connectDB();
 const server = express();
 
 const allowedOrigins = [
-  'https://pkslppmupnyk.io',      // Domain frontend utama Anda
-  'https://www.pkslppmupnyk.io', // Varian dengan www
-  'http://localhost:3000',      // Port umum untuk React dev
-  'http://localhost:5173'       // Port umum untuk Vite dev
+  "https://pkslppmupnyk.io", // Domain frontend utama Anda
+  "https://www.pkslppmupnyk.io", // Varian dengan www
+  "http://localhost:3000", // Port umum untuk React dev
+  "http://localhost:5173", // Port umum untuk Vite dev
 ];
 
 const corsOptions = {
@@ -31,11 +34,10 @@ const corsOptions = {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Akses diblokir oleh kebijakan CORS'));
+      callback(new Error("Akses diblokir oleh kebijakan CORS"));
     }
-  }
+  },
 };
-
 
 server.use(cors(corsOptions));
 server.use(express.json());
@@ -69,4 +71,9 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startReminderCronJob(); // Jalankan cron job
+  // Pesan konfirmasi bahwa cron job aktif
+  console.log(
+    "⏰ Email reminder cron job is active. Checking daily at 08:00 AM."
+  );
 });

@@ -10,7 +10,6 @@
 
 <body>
     <div class="container">
-        <!-- Sidebar Navigation -->
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h2>📚 API Docs</h2>
@@ -61,6 +60,9 @@
                     <li>
                         <a href="#document-endpoints" class="nav-link">📝 Document Generation</a>
                     </li>
+                    <li>
+                        <a href="#email-endpoints" class="nav-link">📧 Email & Reminders</a>
+                    </li>
                 </ul>
             </div>
 
@@ -73,15 +75,12 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
             <header class="header">
                 <h1>PKS Management System API Documentation</h1>
                 <p>Complete REST API documentation for PKS (Perjanjian Kerja Sama) Management System</p>
             </header>
 
-            <!-- Overview Section -->
             <section id="overview" class="content-section">
                 <h2>Overview</h2>
                 <div class="info-box">
@@ -101,7 +100,6 @@
                 </div>
             </section>
 
-            <!-- Base URL Section -->
             <section id="base-url" class="content-section">
                 <h2>Base URL</h2>
                 <div class="code-block">
@@ -111,7 +109,6 @@
                 <p class="note">All API endpoints are prefixed with <code>/api</code></p>
             </section>
 
-            <!-- Authentication Section -->
             <section id="authentication" class="content-section">
                 <h2>Authentication</h2>
                 <div class="info-box">
@@ -124,7 +121,6 @@
                 </div>
             </section>
 
-            <!-- Rate Limiting Section -->
             <section id="rate-limiting" class="content-section">
                 <h2>Rate Limiting</h2>
                 <div class="table-wrapper">
@@ -152,11 +148,9 @@
                 </div>
             </section>
 
-            <!-- Authentication Endpoints -->
             <section id="auth-endpoints" class="content-section">
                 <h2>🔐 Authentication Endpoints</h2>
 
-                <!-- Register Endpoint -->
                 <div id="register" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-post">POST</span>
@@ -201,7 +195,6 @@
                     </div>
                 </div>
 
-                <!-- Login Endpoint -->
                 <div id="login" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-post">POST</span>
@@ -236,7 +229,6 @@
                     </div>
                 </div>
 
-                <!-- Profile Endpoint -->
                 <div id="profile" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-get">GET</span>
@@ -268,7 +260,6 @@
                     </div>
                 </div>
 
-                <!-- Change Password Endpoint -->
                 <div id="change-password" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-patch">PATCH</span>
@@ -296,7 +287,6 @@
                     </div>
                 </div>
 
-                <!-- Logout Endpoint -->
                 <div id="logout" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-post">POST</span>
@@ -317,11 +307,9 @@
                 </div>
             </section>
 
-            <!-- PKS Endpoints -->
             <section id="pks-endpoints" class="content-section">
                 <h2>📄 PKS Management Endpoints</h2>
 
-                <!-- Create PKS -->
                 <div id="create-pks" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-post">POST</span>
@@ -380,7 +368,6 @@
                     </div>
                 </div>
 
-                <!-- Get All PKS -->
                 <div id="get-all-pks" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-get">GET</span>
@@ -451,7 +438,6 @@
                     </div>
                 </div>
 
-                <!-- Get PKS by Nomor -->
                 <div id="get-pks" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-get">GET</span>
@@ -473,7 +459,6 @@
                     </div>
                 </div>
 
-                <!-- Update PKS -->
                 <div id="update-pks" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-patch">PATCH</span>
@@ -500,7 +485,6 @@
                     </div>
                 </div>
 
-                <!-- Delete PKS -->
                 <div id="delete-pks" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-delete">DELETE</span>
@@ -526,11 +510,9 @@
                 </div>
             </section>
 
-            <!-- File Operations -->
             <section id="file-endpoints" class="content-section">
                 <h2>📁 File Operations</h2>
 
-                <!-- Upload File -->
                 <div id="upload-file" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-post">POST</span>
@@ -573,7 +555,6 @@
                     </div>
                 </div>
 
-                <!-- Download File -->
                 <div id="download-file" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-get">GET</span>
@@ -593,7 +574,6 @@
                     </div>
                 </div>
 
-                <!-- Delete File -->
                 <div id="delete-file" class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method method-delete">DELETE</span>
@@ -619,7 +599,6 @@
                 </div>
             </section>
 
-            <!-- Document Generation -->
             <section id="document-endpoints" class="content-section">
                 <h2>📝 Document Generation</h2>
 
@@ -663,7 +642,86 @@ fetch('/api/pks/PKS-2024-0001/generate')
                 </div>
             </section>
 
-            <!-- Models Section -->
+            <section id="email-endpoints" class="content-section">
+                <h2>📧 Email & Reminder Operations</h2>
+                <p class="note">These endpoints are public and do not require admin authentication.</p>
+
+                <div id="start-reminder" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/pks/byid/:id/reminders/start</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Starts the email reminder sequence for a PKS document. The first email is sent immediately,
+                            and subsequent emails are scheduled by the server's cron job.</p>
+
+                        <h4>Path Parameters:</h4>
+                        <ul>
+                            <li><code>id</code> - The unique ID of the PKS document.</li>
+                        </ul>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "Reminder successfully started and first email sent",
+  "data": { ... updated PKS object ... }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stop-reminder" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/pks/byid/:id/reminders/stop</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Stops an active email reminder sequence for a PKS document. No further reminder emails will
+                            be sent.</p>
+
+                        <h4>Path Parameters:</h4>
+                        <ul>
+                            <li><code>id</code> - The unique ID of the PKS document.</li>
+                        </ul>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "Reminder successfully stopped",
+  "data": { ... updated PKS object ... }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="status-notification" class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/pks/byid/:id/status-notification</span>
+                        <span class="badge badge-public">Public</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Sends a one-time email notification to the recipient associated with the PKS, informing them
+                            of the document's current status.</p>
+
+                        <h4>Path Parameters:</h4>
+                        <ul>
+                            <li><code>id</code> - The unique ID of the PKS document.</li>
+                        </ul>
+
+                        <h4>Response (200 OK):</h4>
+                        <div class="code-block">
+                            <pre>{
+  "message": "Status change notification sent successfully"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
             <section id="admin-model" class="content-section">
                 <h2>Admin Model</h2>
                 <div class="code-block">
@@ -716,7 +774,6 @@ fetch('/api/pks/PKS-2024-0001/generate')
                 </div>
             </section>
 
-            <!-- Error Responses -->
             <section class="content-section">
                 <h2>Error Responses</h2>
                 <div class="info-box error-box">
@@ -746,7 +803,6 @@ fetch('/api/pks/PKS-2024-0001/generate')
                 </div>
             </section>
 
-            <!-- Footer -->
             <footer class="footer">
                 <p>PKS Management System API v1.0.0 | © 2024 LPPM UPN Veteran Yogyakarta</p>
             </footer>

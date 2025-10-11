@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
  */
 export const sendStatusNotification = async (pks) => {
   const pksNomorEncoded = encodeURIComponent(pks.content.nomor);
-  const detailLink = `${process.env.CLIENT_URL}/track/${pksNomorEncoded}`;
+  const detailLink = `${process.env.CLIENT_URL}/track/${pks.id}`;
 
   const mailOptions = {
     from: `PKS LPPM UPNYK <${process.env.GMAIL_USER}>`,

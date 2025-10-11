@@ -32,12 +32,10 @@ export const startReminder = async (req, res) => {
 
     await pks.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Reminder successfully started and first email sent",
-        data: pks,
-      });
+    res.status(200).json({
+      message: "Reminder successfully started and first email sent",
+      data: pks,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -66,20 +64,17 @@ export const stopReminder = async (req, res) => {
 };
 
 // Kirim notifikasi perubahan status
-export const sendStatusNotification = async (req, res) => {
+export const triggerStatusNotification = async (req, res) => {
   try {
-    const { id } = req.params;
-    const pks = await PKS.findById(id);
+    const { nomor } = req.params;
+    // Ambil data PKS terbaru dari DB
+    const pks = await PKS.findOne({ "content.nomor": nomor });
 
     if (!pks) {
       return res.status(404).json({ message: "PKS not found" });
     }
 
-    await sendStatusChangeNotification(pks.properties.email, {
-      nomor: pks.content.nomor,
-      judul: pks.content.judul,
-      status: pks.properties.status,
-    });
+    await sendStatusNotification(pks);
 
     res
       .status(200)

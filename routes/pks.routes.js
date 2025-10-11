@@ -99,7 +99,14 @@ pksRouter.post("/byid/:id/reminders/start", startReminder);
 // STOP Reminder by ID
 pksRouter.post("/byid/:id/reminders/stop", stopReminder);
 
-// Send Status Change Notification by ID
-pksRouter.post("/byid/:id/status-notification", sendStatusNotification);
+// Send Status Change Notification by ID (ADMIN ONLY)
+pksRouter.post(
+  "/byid/:id/status-notification",
+  protect,
+  triggerStatusNotification
+);
+// --- DENGAN YANG DI BAWAH INI ---
+// Send Status Change Notification by Nomor (ADMIN ONLY)
+pksRouter.post("/:nomor/send-notification", protect, triggerStatusNotification);
 
 export default pksRouter;

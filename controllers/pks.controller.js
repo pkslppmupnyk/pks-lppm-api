@@ -27,23 +27,28 @@ const deleteFileFromServer = async (fileName) => {
 };
 
 // CREATE
-// ... (import dan fungsi helper lainnya)
-
-// CREATE
 export const createPKS = async (req, res) => {
   try {
-    // ... (langkah 1 & 2 tidak berubah)
+    // 1. Validasi dulu tanpa nomor (pksTemp didefinisikan di sini)
+    const pksTemp = new PKS({
+      ...req.body,
+      content: {
+        ...req.body.content,
+        nomor: "TEMP",
+      },
+    });
+
+    // 2. Trigger validasi tanpa save
+    await pksTemp.validate();
 
     // 3. Jika validasi OK, baru generate nomor
     const seq = await DocNumber.getNextSeq("PKS");
     const year = new Date().getFullYear();
 
-    // --- PERUBAHAN UTAMA DI SINI ---
     // Buat nomor dengan format garis miring dulu
     const originalNomor = `${seq}/UN62.21/KS.00.00/${year}`;
     // Simpan ke database dengan format tanda hubung
     const nomor = originalNomor.replace(/\//g, "-");
-    // ------------------------------------
 
     // 4. Set nomor yang benar
     pksTemp.content.nomor = nomor;
@@ -60,7 +65,6 @@ export const createPKS = async (req, res) => {
   }
 };
 
-// ... (sisa fungsi tidak berubah)
 // READ ALL (optional filter + pagination)
 export const getAllPKS = async (req, res) => {
   try {
@@ -88,8 +92,6 @@ export const getAllPKS = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-// ==================== READ BY NOMOR (DEFAULT) ====================
 
 // READ ONE by NOMOR
 export const getPKSByNomor = async (req, res) => {
@@ -122,15 +124,11 @@ export const updatePKSByNomor = async (req, res) => {
         .json({ message: "PKS not found with nomor: " + nomor });
     }
 
-    // 🛡️ SOLUSI TERBAIK: Hapus nomor dari updateData untuk mencegah overwrite
     if (updateData.content && updateData.content.nomor) {
-      delete updateData.content.nomor; // Jangan izinkan update nomor sama sekali
+      delete updateData.content.nomor;
     }
 
-    // Lalu gunakan $set untuk nested fields
     const updateQuery = {};
-
-    // Update content fields (kecuali nomor)
     if (updateData.content) {
       Object.keys(updateData.content).forEach((key) => {
         if (key !== "nomor") {
@@ -138,15 +136,11 @@ export const updatePKSByNomor = async (req, res) => {
         }
       });
     }
-
-    // Update pihakKedua
     if (updateData.pihakKedua) {
       Object.keys(updateData.pihakKedua).forEach((key) => {
         updateQuery[`pihakKedua.${key}`] = updateData.pihakKedua[key];
       });
     }
-
-    // Update properties
     if (updateData.properties) {
       Object.keys(updateData.properties).forEach((key) => {
         updateQuery[`properties.${key}`] = updateData.properties[key];
@@ -177,7 +171,6 @@ export const submitForReview = async (req, res) => {
         .json({ message: "PKS not found with nomor: " + nomor });
     }
 
-    // Validasi: Hanya bisa di-submit jika statusnya "menunggu dokumen"
     if (pks.properties.status !== "menunggu dokumen") {
       return res.status(400).json({
         message: `Cannot submit for review. Current status is '${pks.properties.status}'.`,
@@ -208,7 +201,6 @@ export const deletePKSByNomor = async (req, res) => {
         .json({ message: "PKS not found with nomor: " + nomor });
     }
 
-    // Hapus file jika ada
     if (pks.fileUpload.fileName) {
       await deleteFileFromServer(pks.fileUpload.fileName);
     }
@@ -223,8 +215,6 @@ export const deletePKSByNomor = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-// ==================== READ BY ID ====================
 
 // READ ONE by ID
 export const getPKSById = async (req, res) => {
@@ -268,7 +258,6 @@ export const deletePKS = async (req, res) => {
       return res.status(404).json({ message: "PKS not found" });
     }
 
-    // Hapus file jika ada
     if (deleted.fileUpload.fileName) {
       await deleteFileFromServer(deleted.fileUpload.fileName);
     }

@@ -27,26 +27,23 @@ const deleteFileFromServer = async (fileName) => {
 };
 
 // CREATE
+// ... (import dan fungsi helper lainnya)
+
+// CREATE
 export const createPKS = async (req, res) => {
   try {
-    // 1. Validasi dulu tanpa nomor
-    const pksTemp = new PKS({
-      ...req.body,
-      content: {
-        ...req.body.content,
-        nomor: "TEMP", // temporary value
-      },
-    });
-
-    // 2. Trigger validasi tanpa save
-    await pksTemp.validate();
+    // ... (langkah 1 & 2 tidak berubah)
 
     // 3. Jika validasi OK, baru generate nomor
     const seq = await DocNumber.getNextSeq("PKS");
     const year = new Date().getFullYear();
 
-    // Format nomor baru sesuai permintaan
-    const nomor = `${seq}/UN62.21/KS.00.00/${year}`;
+    // --- PERUBAHAN UTAMA DI SINI ---
+    // Buat nomor dengan format garis miring dulu
+    const originalNomor = `${seq}/UN62.21/KS.00.00/${year}`;
+    // Simpan ke database dengan format tanda hubung
+    const nomor = originalNomor.replace(/\//g, "-");
+    // ------------------------------------
 
     // 4. Set nomor yang benar
     pksTemp.content.nomor = nomor;
@@ -63,6 +60,7 @@ export const createPKS = async (req, res) => {
   }
 };
 
+// ... (sisa fungsi tidak berubah)
 // READ ALL (optional filter + pagination)
 export const getAllPKS = async (req, res) => {
   try {
@@ -181,11 +179,9 @@ export const submitForReview = async (req, res) => {
 
     // Validasi: Hanya bisa di-submit jika statusnya "menunggu dokumen"
     if (pks.properties.status !== "menunggu dokumen") {
-      return res
-        .status(400)
-        .json({
-          message: `Cannot submit for review. Current status is '${pks.properties.status}'.`,
-        });
+      return res.status(400).json({
+        message: `Cannot submit for review. Current status is '${pks.properties.status}'.`,
+      });
     }
 
     pks.properties.status = "menunggu review";

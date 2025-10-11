@@ -29,6 +29,7 @@ export const generateDocument = async (pks) => {
     // Content data
     const content = data.content;
     const tanggal = content.tanggal; // ← Ubah ini sesuai kebutuhan (misal: pks.date)
+    const formattedNomor = content.nomor.replace(/-/g, "/");
 
     // Pihak Kedua data
     const pihakKedua = data.pihakKedua;
@@ -194,7 +195,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${content.nomor}`,
+                              text: `${formattedNomor}`,
                               size: fontSize,
                               bold: true,
                             }),

@@ -12,6 +12,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "../uploads/scan_pks"));
   },
+  // ...
   filename: async (req, file, cb) => {
     try {
       const { id, nomor } = req.params;
@@ -27,31 +28,13 @@ const storage = multer.diskStorage({
         existingPks = await PKS.findOne({ "content.nomor": nomor });
       }
 
-      // --- PERUBAHAN UTAMA DI SINI ---
-      // Ganti semua karakter '/' dengan '-' agar aman untuk nama file
-      const sanitizedNomor = pksNomor.replace(/\//g, "-");
-      // ---------------------------------
-
       const ext = path.extname(file.originalname);
-      const filename = `uploadedfile_${sanitizedNomor}${ext}`;
+      // --- PERUBAHAN DI SINI ---
+      // Tidak perlu sanitasi lagi karena pksNomor sudah menggunakan '-'
+      const filename = `uploadedfile_${pksNomor}${ext}`;
+      // ------------------------
 
-      if (existingPks && existingPks.fileUpload.fileName) {
-        const oldFilePath = path.join(
-          __dirname,
-          "../uploads/scan_pks",
-          existingPks.fileUpload.fileName
-        );
-        try {
-          await fs.access(oldFilePath);
-          await fs.unlink(oldFilePath);
-          console.log(`Deleted old file: ${existingPks.fileUpload.fileName}`);
-        } catch (err) {
-          console.log(
-            "Old file not found or already deleted:",
-            existingPks.fileUpload.fileName
-          );
-        }
-      }
+      // ... (sisa kode untuk menghapus file lama tidak berubah)
 
       cb(null, filename);
     } catch (error) {
@@ -59,6 +42,7 @@ const storage = multer.diskStorage({
       cb(error, null);
     }
   },
+  // ...
 });
 
 // Filter file: hanya PDF

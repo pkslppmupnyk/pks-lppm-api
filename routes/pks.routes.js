@@ -25,7 +25,7 @@ import {
 import {
   startReminder,
   stopReminder,
-  sendStatusNotification,
+  triggerStatusNotification,
 } from "../controllers/email.controller.js";
 
 import { generatePKSDocument } from "../controllers/document.controller.js";

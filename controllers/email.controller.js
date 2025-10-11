@@ -63,18 +63,24 @@ export const stopReminder = async (req, res) => {
   }
 };
 
-// Kirim notifikasi perubahan status
-export const triggerStatusNotification = async (req, res) => {
-  // --- TAMBAHKAN LOG INI UNTUK DEBUGGING ---
+// Kirim notifikasi perubahan status berdasarkan ID
+export const triggerStatusNotificationById = async (req, res) => {
+  console.log(
+    `[LOG] Menerima pemicu email notifikasi untuk PKS ID: ${req.params.id}`
+  );
+
   try {
     const { id } = req.params;
-    const pks = await PKS.findById(id); // Gunakan findById
+    const pks = await PKS.findById(id);
 
     if (!pks) {
+      console.error(`[ERROR] PKS tidak ditemukan dengan ID: ${id}`);
       return res.status(404).json({ message: "PKS not found" });
     }
 
+    console.log(`[LOG] Mengirim email ke: ${pks.properties.email}`);
     await sendStatusNotification(pks);
+
     res
       .status(200)
       .json({ message: "Status change notification sent successfully" });

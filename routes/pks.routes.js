@@ -1,5 +1,3 @@
-// pkslppmupnyk/pks-lppm-api/pks-lppm-api-1299943cfbbfefe44c5b4085e404309d72f03997/routes/pks.routes.js
-
 import { Router } from "express";
 const pksRouter = Router();
 
@@ -10,7 +8,7 @@ import {
   getPKSById,
   updatePKS,
   deletePKS,
-  submitForReviewById, // Ganti nama fungsi ini
+  submitForReviewById,
 } from "../controllers/pks.controller.js";
 
 import {
@@ -22,16 +20,17 @@ import {
 import {
   startReminder,
   stopReminder,
-  triggerStatusNotificationById, // Ganti nama fungsi ini
+  triggerStatusNotificationById,
 } from "../controllers/email.controller.js";
 
-import { generatePKSDocumentById } from "../controllers/document.controller.js"; // Ganti nama fungsi ini
+// Mengimpor dengan nama yang benar
+import { generatePKSDocumentById } from "../controllers/document.controller.js";
 import upload from "../middleware/upload.middleware.js";
 import { protect } from "../middleware/auth.middleware.js";
 
 // === PKS CRUD (berbasis ID) ===
-pksRouter.post("/", createPKS); // Tetap
-pksRouter.get("/", getAllPKS); // Tetap
+pksRouter.post("/", createPKS);
+pksRouter.get("/", getAllPKS);
 pksRouter.get("/:id", getPKSById);
 pksRouter.patch("/:id", protect, updatePKS);
 pksRouter.delete("/:id", protect, deletePKS);

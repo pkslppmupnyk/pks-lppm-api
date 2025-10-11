@@ -7,34 +7,40 @@ import PKS from "../models/pks.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Konfigurasi storage
+// Konfigurasi storage untuk Multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/scan_pks"));
+  destination: async (req, file, cb) => {
+    const dest = path.join(__dirname, "../uploads/scan_pks");
+    try {
+      // Pastikan direktori tujuan ada
+      await fs.mkdir(dest, { recursive: true });
+      cb(null, dest);
+    } catch (err) {
+      cb(err);
+    }
   },
-  // ...
   filename: async (req, file, cb) => {
     try {
-      const { id, nomor } = req.params;
-      let pksNomor = nomor;
-      let existingPks = null;
+      const { id } = req.params;
+      if (!id) {
+        return cb(new Error("PKS ID is required for file upload."), null);
+      }
 
-      if (id && !nomor) {
-        existingPks = await PKS.findById(id);
-        if (existingPks) {
-          pksNomor = existingPks.content.nomor;
-        }
-      } else if (nomor) {
-        existingPks = await PKS.findOne({ "content.nomor": nomor });
+      // Cari PKS untuk menghapus file lama jika ada
+      const existingPks = await PKS.findById(id);
+      if (existingPks && existingPks.fileUpload.fileName) {
+        const oldFilePath = path.join(
+          __dirname,
+          "../uploads/scan_pks",
+          existingPks.fileUpload.fileName
+        );
+        // Coba hapus file lama, abaikan jika gagal (misal: file tidak ada)
+        await fs.unlink(oldFilePath).catch(() => {});
       }
 
       const ext = path.extname(file.originalname);
-      // --- PERUBAHAN DI SINI ---
-      // Tidak perlu sanitasi lagi karena pksNomor sudah menggunakan '-'
-      const filename = `uploadedfile_${pksNomor}${ext}`;
-      // ------------------------
-
-      // ... (sisa kode untuk menghapus file lama tidak berubah)
+      // Gunakan ID unik dari PKS sebagai nama file
+      const filename = `uploadedfile_${id}${ext}`;
 
       cb(null, filename);
     } catch (error) {
@@ -42,10 +48,9 @@ const storage = multer.diskStorage({
       cb(error, null);
     }
   },
-  // ...
 });
 
-// Filter file: hanya PDF
+// Filter file: hanya izinkan PDF
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /pdf/;
   const extname = allowedTypes.test(
@@ -56,16 +61,16 @@ const fileFilter = (req, file, cb) => {
   if (extname && mimetype) {
     cb(null, true);
   } else {
-    cb(new Error("Only PDF files are allowed"), false);
+    cb(new Error("Hanya file dengan format .pdf yang diizinkan"), false);
   }
 };
 
-// Multer config
+// Konfigurasi Multer
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max
+    fileSize: 10 * 1024 * 1024, // Batas ukuran file 10MB
   },
 });
 

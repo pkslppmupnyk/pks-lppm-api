@@ -65,26 +65,21 @@ export const stopReminder = async (req, res) => {
 
 // Kirim notifikasi perubahan status
 export const triggerStatusNotification = async (req, res) => {
-    // --- TAMBAHKAN LOG INI UNTUK DEBUGGING ---
-    console.log(`[LOG] Menerima pemicu email notifikasi untuk PKS: ${req.params.nomor}`);
-    // -----------------------------------------
+  // --- TAMBAHKAN LOG INI UNTUK DEBUGGING ---
+  try {
+    const { id } = req.params;
+    const pks = await PKS.findById(id); // Gunakan findById
 
-    try {
-        const { nomor } = req.params;
-        const pks = await PKS.findOne({ "content.nomor": nomor });
-
-        if (!pks) {
-            console.error(`[ERROR] PKS tidak ditemukan: ${nomor}`);
-            return res.status(404).json({ message: "PKS not found" });
-        }
-        
-        console.log(`[LOG] Mengirim email ke: ${pks.properties.email}`);
-        await sendStatusNotification(pks);
-
-        res.status(200).json({ message: "Status change notification sent successfully" });
-
-    } catch (error) {
-        console.error("[ERROR] Gagal mengirim email notifikasi:", error);
-        res.status(500).json({ error: error.message });
+    if (!pks) {
+      return res.status(404).json({ message: "PKS not found" });
     }
+
+    await sendStatusNotification(pks);
+    res
+      .status(200)
+      .json({ message: "Status change notification sent successfully" });
+  } catch (error) {
+    console.error("[ERROR] Gagal mengirim email notifikasi:", error);
+    res.status(500).json({ error: error.message });
+  }
 };

@@ -1,7 +1,7 @@
 // controllers/email.controller.js
 import PKS from "../models/pks.model.js";
 import {
-  sendStatusChangeNotification,
+  sendStatusNotification,
   sendReminderEmail,
 } from "../services/email.service.js";
 

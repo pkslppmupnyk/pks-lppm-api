@@ -1606,6 +1606,6 @@ export const generateDocument = async (pks) => {
     return buffer;
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Error generating document");
+    throw new Error("Gagal membuat dokumen: " + error.message);
   }
 };

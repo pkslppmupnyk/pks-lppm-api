@@ -9,7 +9,6 @@ const pksSchema = new mongoose.Schema(
       nomor: {
         type: String,
         unique: true,
-        // immutable: true, // Baris ini dihapus agar nomor bisa diubah
       },
       judul: {
         type: String,
@@ -87,6 +86,12 @@ const pksSchema = new mongoose.Schema(
         match: [emailRegex, "Format email tidak valid"],
         index: true,
       },
+      // --- TAMBAHKAN FIELD BARU DI SINI ---
+      telepon: {
+        type: String,
+        trim: true,
+      },
+      // ------------------------------------
       reminderDate: {
         type: Date,
         index: true,

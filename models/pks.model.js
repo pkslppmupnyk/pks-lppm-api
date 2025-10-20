@@ -116,6 +116,13 @@ const pksSchema = new mongoose.Schema(
         default: "",
       },
     },
+    logoUpload: {
+      fileName: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
   },
   {
     timestamps: true,

@@ -18,6 +18,12 @@ import {
 } from "../controllers/file.controller.js";
 
 import {
+  uploadLogoById,
+  deleteLogoById,
+} from "../controllers/logo.controller.js";
+import uploadLogo from "../middleware/logoUpload.middleware.js"; // Import middleware logo
+
+import {
   startReminder,
   stopReminder,
   triggerStatusNotificationById,
@@ -48,6 +54,10 @@ pksRouter.post(
 pksRouter.post("/:id/file", upload.single("file"), uploadFileById);
 pksRouter.get("/:id/file", downloadFileById);
 pksRouter.delete("/:id/file", protect, deleteFileById);
+
+// === OPERASI LOGO (berbasis ID) - TAMBAHKAN INI ===
+pksRouter.post("/:id/logo", protect, uploadLogo.single("logo"), uploadLogoById);
+pksRouter.delete("/:id/logo", protect, deleteLogoById);
 
 // === Operasi Reminder (sudah berbasis ID) ===
 pksRouter.post("/:id/reminders/start", startReminder);

@@ -16,6 +16,7 @@ import terbilang from "terbilang";
 import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
 import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
 import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
+import { toAllCapital, toCapitalizeFirst } from "./textFormatter";
 
 export const generateDocument = async (pks) => {
   try {
@@ -217,7 +218,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({ text: `DAN`, bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: `${pihakKedua.instansi}`,
+                  text: `${toAllCapital(pihakKedua.instansi)}`,
                   bold: true,
                   size: fontSize,
                 }),
@@ -354,7 +355,7 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `${content.judul}`,
+                  text: `${toAllCapital(content.judul)}`,
                   bold: true,
                   size: fontSize,
                 }),

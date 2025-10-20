@@ -10,6 +10,7 @@ import {
   TableCell,
   TableBorders,
   WidthType,
+  ImageRun,
 } from "docx";
 import terbilang from "terbilang";
 import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file

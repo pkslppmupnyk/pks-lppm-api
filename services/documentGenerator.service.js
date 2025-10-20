@@ -12,9 +12,85 @@ import {
   WidthType,
 } from "docx";
 import terbilang from "terbilang";
+import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
+import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
+import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
 
 export const generateDocument = async (pks) => {
   try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    // ============================================================
+    // PERSIAPAN LOGO
+    // ============================================================
+
+    // Baca logo UPN dari folder public
+    const upnLogoPath = path.join(
+      __dirname,
+      "../../public/images/logo_upn.png"
+    );
+    const upnLogo = fs.readFileSync(upnLogoPath);
+
+    // Baca logo mitra jika ada
+    let partnerLogo = null;
+    if (pks.logoUpload && pks.logoUpload.fileName) {
+      const partnerLogoPath = path.join(
+        __dirname,
+        "../../uploads/logos",
+        pks.logoUpload.fileName
+      );
+      try {
+        // Cek apakah file logo mitra benar-benar ada sebelum dibaca
+        if (fs.existsSync(partnerLogoPath)) {
+          partnerLogo = fs.readFileSync(partnerLogoPath);
+        }
+      } catch (e) {
+        console.error("Logo mitra tidak ditemukan, akan dilewati.");
+      }
+    }
+
+    // Buat tabel header untuk menampung logo
+    const logoHeader = new Table({
+      columnWidths: [4500, 4500],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: upnLogo,
+                      transformation: { width: 100, height: 100 },
+                    }),
+                  ],
+                  alignment: AlignmentType.LEFT,
+                }),
+              ],
+            }),
+            new TableCell({
+              children: [
+                partnerLogo
+                  ? new Paragraph({
+                      children: [
+                        new ImageRun({
+                          data: partnerLogo,
+                          transformation: { width: 100, height: 100 },
+                        }),
+                      ],
+                      alignment: AlignmentType.RIGHT,
+                    })
+                  : new Paragraph({ text: "" }), // Kosongkan sel jika tidak ada logo mitra
+              ],
+            }),
+          ],
+        }),
+      ],
+      borders: TableBorders.NONE,
+    });
+
     // ============================================================
     // DATA EXTRACTION
     // ============================================================
@@ -106,6 +182,9 @@ export const generateDocument = async (pks) => {
           },
           children: [
             // HEADER
+            logoHeader,
+            new Paragraph({ text: "" }),
+
             new Paragraph({
               style: "Normal",
               children: [

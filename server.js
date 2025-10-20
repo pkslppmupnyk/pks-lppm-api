@@ -51,6 +51,9 @@ const __dirname = path.dirname(__filename);
 server.use("/api/css", express.static(path.join(__dirname, "public/css")));
 server.use("/api/js", express.static(path.join(__dirname, "public/js")));
 
+// --- TAMBAHKAN BARIS INI UNTUK MENYAJIKAN FILE UPLOAD ---
+server.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
+
 //  halaman dokumentasi
 server.get("/api", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "documentation.html"));

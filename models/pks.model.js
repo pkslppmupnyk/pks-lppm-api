@@ -1,16 +1,15 @@
+// pkslppmupnyk/pks-lppm-api/pks-lppm-api-cdbb3090bc26c697114ce7081d0e9d3e3badd715/models/pks.model.js
 import mongoose from "mongoose";
 
-// regex email valid
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-// skema struktur database
 const pksSchema = new mongoose.Schema(
   {
     content: {
       nomor: {
         type: String,
         unique: true,
-        immutable: true,
+        // immutable: true, // Baris ini dihapus agar nomor bisa diubah
       },
       judul: {
         type: String,
@@ -23,10 +22,8 @@ const pksSchema = new mongoose.Schema(
       },
       tanggalKadaluarsa: {
         type: Date,
-        // Removed index: true to avoid duplicate with schema.index() below
       },
     },
-
     pihakKedua: {
       instansi: {
         type: String,
@@ -53,7 +50,6 @@ const pksSchema = new mongoose.Schema(
         trim: true,
       },
     },
-
     properties: {
       uploadDate: {
         type: Date,
@@ -108,16 +104,13 @@ const pksSchema = new mongoose.Schema(
         default: true,
       },
     },
-
     fileUpload: {
       docName: {
-        // nama asli file (misalnya: "PKS_ABC.pdf")
         type: String,
         trim: true,
         default: "",
       },
       fileName: {
-        // nama file di server (misalnya: "1734567890.pdf")
         type: String,
         trim: true,
         default: "",
@@ -129,7 +122,6 @@ const pksSchema = new mongoose.Schema(
   }
 );
 
-// Index compound
 pksSchema.index({ "properties.status": 1, "properties.uploadDate": -1 });
 pksSchema.index({
   "properties.reminderDate": 1,

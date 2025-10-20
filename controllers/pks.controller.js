@@ -99,13 +99,38 @@ export const getPKSById = async (req, res) => {
   }
 };
 
-// UPDATE by ID
 export const updatePKS = async (req, res) => {
   try {
+    const pks = await PKS.findById(req.params.id);
+    if (!pks) {
+      return res.status(404).json({ message: "PKS not found" });
+    }
+
     const updateData = req.body;
 
-    // Mencegah nomor PKS diubah saat update
-    if (updateData.content && updateData.content.nomor) {
+    // Cek jika cakupan kerja sama diubah
+    if (
+      updateData.properties &&
+      updateData.properties.cakupanKerjaSama &&
+      updateData.properties.cakupanKerjaSama !== pks.properties.cakupanKerjaSama
+    ) {
+      // Regenerasi nomor jika cakupan berubah
+      const currentNomorParts = pks.content.nomor.split("/");
+      const seq = currentNomorParts[0];
+      const year = currentNomorParts[3];
+      const newCakupanCode =
+        updateData.properties.cakupanKerjaSama === "luar negeri"
+          ? "KS.00.01"
+          : "KS.00.00";
+
+      const newNomor = `${seq}/UN62.21/${newCakupanCode}/${year}`;
+
+      if (!updateData.content) {
+        updateData.content = {};
+      }
+      updateData.content.nomor = newNomor;
+    } else if (updateData.content && updateData.content.nomor) {
+      // Cegah perubahan nomor manual jika cakupan tidak berubah
       delete updateData.content.nomor;
     }
 
@@ -114,10 +139,6 @@ export const updatePKS = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     );
-
-    if (!updated) {
-      return res.status(404).json({ message: "PKS not found" });
-    }
 
     res.json({ message: "PKS updated successfully", data: updated });
   } catch (err) {

@@ -26,10 +26,7 @@ export const generateDocument = async (pks) => {
     // ============================================================
 
     // Baca logo UPN dari folder public
-    const upnLogoPath = path.join(
-      __dirname,
-      "../../public/images/logo_upn.png"
-    );
+    const upnLogoPath = path.join(__dirname, "/public/images/logo_upn.png");
     const upnLogo = fs.readFileSync(upnLogoPath);
 
     // Baca logo mitra jika ada

@@ -38,7 +38,11 @@ export const createPKS = async (req, res) => {
     // 3. Jika valid, generate nomor PKS yang sebenarnya
     const seq = await DocNumber.getNextSeq("PKS");
     const year = new Date().getFullYear();
-    const nomor = `${seq}/UN62.21/KS.00.00/${year}`;
+    const cakupan =
+      pksTemp.properties.cakupanKerjaSama === "luar negeri"
+        ? "KS.00.01"
+        : "KS.00.00";
+    const nomor = `${seq}/UN62.21/${cakupan}/${year}`;
 
     // 4. Tetapkan nomor yang benar
     pksTemp.content.nomor = nomor;

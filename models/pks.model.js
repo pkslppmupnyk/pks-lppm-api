@@ -60,6 +60,13 @@ const pksSchema = new mongoose.Schema(
         default: Date.now,
         index: true,
       },
+      cakupanKerjaSama: {
+        type: String,
+        enum: ["dalam negeri", "luar negeri"],
+        required: [true, "Cakupan kerja sama is required"],
+        default: "dalam negeri",
+        index: true,
+      },
       status: {
         type: String,
         enum: [

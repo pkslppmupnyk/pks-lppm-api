@@ -129,9 +129,11 @@ export const updatePKS = async (req, res) => {
         updateData.content = {};
       }
       updateData.content.nomor = newNomor;
-    } else if (updateData.content && updateData.content.nomor) {
-      // Cegah perubahan nomor manual jika cakupan tidak berubah
-      delete updateData.content.nomor;
+    } else {
+      // Pertahankan nomor yang ada jika cakupan tidak berubah
+      if (updateData.content) {
+        updateData.content.nomor = pks.content.nomor;
+      }
     }
 
     const updated = await PKS.findByIdAndUpdate(

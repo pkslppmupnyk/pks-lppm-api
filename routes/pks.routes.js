@@ -56,7 +56,7 @@ pksRouter.get("/:id/file", downloadFileById);
 pksRouter.delete("/:id/file", protect, deleteFileById);
 
 // === OPERASI LOGO (berbasis ID) - TAMBAHKAN INI ===
-pksRouter.post("/:id/logo", protect, uploadLogo.single("logo"), uploadLogoById);
+pksRouter.post("/:id/logo", uploadLogo.single("logo"), uploadLogoById);
 pksRouter.delete("/:id/logo", protect, deleteLogoById);
 
 // === Operasi Reminder (sudah berbasis ID) ===

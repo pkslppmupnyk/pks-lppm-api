@@ -1,4 +1,3 @@
-import PKS from "../models/pks.model.js";
 import {
   Document,
   Packer,
@@ -11,26 +10,22 @@ import {
   TableBorders,
   WidthType,
   ImageRun,
+  Header,
 } from "docx";
 import terbilang from "terbilang";
-import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
-import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
-import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export const generateDocument = async (pks) => {
   try {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
-    // ============================================================
-    // PERSIAPAN LOGO
-    // ============================================================
-
-    // Baca logo UPN dari folder public
+    // --- PERSIAPAN LOGO ---
     const upnLogoPath = path.join(__dirname, "../public/images/logo_upn.png");
     const upnLogo = fs.readFileSync(upnLogoPath);
 
-    // Baca logo mitra jika ada
     let partnerLogo = null;
     if (pks.logoUpload && pks.logoUpload.fileName) {
       const partnerLogoPath = path.join(
@@ -38,98 +33,51 @@ export const generateDocument = async (pks) => {
         "../uploads/logos",
         pks.logoUpload.fileName
       );
-      try {
-        // Cek apakah file logo mitra benar-benar ada sebelum dibaca
-        if (fs.existsSync(partnerLogoPath)) {
-          partnerLogo = fs.readFileSync(partnerLogoPath);
-        }
-      } catch (e) {
-        console.error("Logo mitra tidak ditemukan, akan dilewati.");
+      if (fs.existsSync(partnerLogoPath)) {
+        partnerLogo = fs.readFileSync(partnerLogoPath);
       }
     }
 
-    // Buat tabel header untuk menampung logo
-    const logoHeader = new Table({
-      columnWidths: [4500, 4500],
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new ImageRun({
-                      data: upnLogo,
-                      transformation: { width: 100, height: 100 },
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
-                }),
-              ],
-            }),
-            new TableCell({
-              children: [
-                partnerLogo
-                  ? new Paragraph({
-                      children: [
-                        new ImageRun({
-                          data: partnerLogo,
-                          transformation: { width: 100, height: 100 },
-                        }),
-                      ],
-                      alignment: AlignmentType.RIGHT,
-                    })
-                  : new Paragraph({ text: "" }), // Kosongkan sel jika tidak ada logo mitra
-              ],
-            }),
-          ],
-        }),
-      ],
-      borders: TableBorders.NONE,
-    });
+    // --- DATA EXTRACTION & FORMATTING ---
+    const data = pks;
+    const content = data.content || {};
+    const tanggal = content.tanggal ? new Date(content.tanggal) : null;
+    const formattedNomor = (content.nomor || "").replace(/-/g, "/");
+    const pihakKedua = data.pihakKedua || {};
 
-    // ============================================================
-    // DATA EXTRACTION
-    // ============================================================
+    const capitalizeEachWord = (str) =>
+      str ? str.replace(/\b\w/g, (char) => char.toUpperCase()) : "";
 
-    const data = pks; // langsung pakai object PKS dari controller
+    const judulKapital = (content.judul || "KERJA SAMA").toUpperCase();
+    const judulAwalKapital = capitalizeEachWord(content.judul || "Kerja Sama");
 
-    // ============================================================
-    // VARIABLE INITIALIZATION
-    // Sesuaikan variabel di sini untuk lingkungan baru
-    // ============================================================
+    const namaHari = tanggal
+      ? capitalizeEachWord(
+          tanggal.toLocaleDateString("id-ID", { weekday: "long" })
+        )
+      : "";
+    const namaBulan = tanggal
+      ? capitalizeEachWord(
+          tanggal.toLocaleDateString("id-ID", { month: "long" })
+        )
+      : "";
+    const tanggalHuruf = tanggal
+      ? capitalizeEachWord(terbilang(tanggal.getDate()))
+      : "";
+    const tahunHuruf = tanggal
+      ? capitalizeEachWord(terbilang(tanggal.getFullYear()))
+      : "";
+    const formatAngka = tanggal
+      ? `${tanggal.getDate().toString().padStart(2, "0")}-${(
+          tanggal.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}-${tanggal.getFullYear()}`
+      : "";
+    const kalimatTanggal = tanggal
+      ? `${namaHari}, tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} (${formatAngka})`
+      : "Pada hari ini";
 
-    // Content data
-    const content = data.content;
-    const tanggal = content.tanggal; // ← Ubah ini sesuai kebutuhan (misal: pks.date)
-    const formattedNomor = content.nomor.replace(/-/g, "/");
-
-    // Pihak Kedua data
-    const pihakKedua = data.pihakKedua;
-
-    // Helper function
-    const capitalizeEachWord = (str) => {
-      return str.replace(/\b\w/g, (char) => char.toUpperCase());
-    };
-
-    // Date formatting
-    const namaHari = capitalizeEachWord(
-      tanggal.toLocaleDateString("id-ID", { weekday: "long" })
-    );
-    const namaBulan = capitalizeEachWord(
-      tanggal.toLocaleDateString("id-ID", { month: "long" })
-    );
-    const tanggalHuruf = capitalizeEachWord(terbilang(tanggal.getDate()));
-    const tahunHuruf = capitalizeEachWord(terbilang(tanggal.getFullYear()));
-    const formatAngka = `${tanggal.getDate().toString().padStart(2, "0")}-${(
-      tanggal.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}-${tanggal.getFullYear()}`;
-    const kalimatTanggal = `${namaHari}, tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} (${formatAngka})`;
-
-    // Pihak Pertama data (static - bisa dipindah ke config jika perlu)
     const pihakPertama = {
       nama: "Dr. Dyah Sugandini, SE, M.Si",
       jabatan: `Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta`,
@@ -138,23 +86,17 @@ export const generateDocument = async (pks) => {
         "Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283",
       nip: "19710617 202121 2 001",
     };
-
-    // Document settings
-    const fontSize = 24; // 12pt (docx uses half-points)
+    const fontSize = 24; // 12pt
     const lineSpacing = 276; // 1.15 line spacing
 
-    // ============================================================
-    // DOCUMENT GENERATION
-    // ============================================================
+    // --- PEMBUATAN DOKUMEN ---
     const doc = new Document({
       styles: {
         paragraphStyles: [
           {
             id: "Normal",
             name: "Normal",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
+            run: { size: fontSize },
             paragraph: {
               spacing: {
                 before: 0,
@@ -168,21 +110,68 @@ export const generateDocument = async (pks) => {
       },
       sections: [
         {
+          headers: {
+            default: new Header({
+              children: [
+                new Table({
+                  columnWidths: [4500, 4500],
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                  rows: [
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              children: [
+                                new ImageRun({
+                                  data: upnLogo,
+                                  transformation: { width: 100, height: 100 },
+                                }),
+                              ],
+                              alignment: AlignmentType.LEFT,
+                            }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            partnerLogo
+                              ? new Paragraph({
+                                  children: [
+                                    new ImageRun({
+                                      data: partnerLogo,
+                                      transformation: {
+                                        width: 100,
+                                        height: 100,
+                                      },
+                                    }),
+                                  ],
+                                  alignment: AlignmentType.RIGHT,
+                                })
+                              : new Paragraph({ text: "" }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                  borders: TableBorders.NONE,
+                }),
+              ],
+            }),
+          },
           properties: {
             page: {
               margin: {
-                top: 4 * 567,
-                bottom: 3 * 567,
-                left: 2.54 * 567,
-                right: 2.54 * 567,
+                top: 1440,
+                bottom: 1440,
+                left: 1440,
+                right: 1440,
+                header: 720,
               },
             },
           },
           children: [
-            // HEADER
-            logoHeader,
             new Paragraph({ text: "" }),
-
+            // HEADER
             new Paragraph({
               style: "Normal",
               children: [
@@ -217,7 +206,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({ text: `DAN`, bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: `${pihakKedua.instansi}`,
+                  text: `${(pihakKedua.instansi || "").toUpperCase()}`,
                   bold: true,
                   size: fontSize,
                 }),
@@ -248,7 +237,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.RIGHT,
                         }),
                       ],
-                      width: { size: 35, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
@@ -264,7 +252,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
@@ -280,7 +267,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -300,7 +286,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.RIGHT,
                         }),
                       ],
-                      width: { size: 35, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
@@ -316,7 +301,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
@@ -324,7 +308,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${pihakKedua.nomor}`,
+                              text: `${pihakKedua.nomor || ""}`,
                               size: fontSize,
                               bold: true,
                             }),
@@ -332,7 +316,6 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -345,21 +328,12 @@ export const generateDocument = async (pks) => {
             // TENTANG
             new Paragraph({
               style: "Normal",
+              alignment: AlignmentType.CENTER,
               children: [
                 new TextRun({ text: "TENTANG", bold: true, size: fontSize }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: judulKapital, bold: true, size: fontSize }),
               ],
-              alignment: AlignmentType.CENTER,
-            }),
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `${content.judul}`,
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
             }),
 
             new Paragraph({ text: "" }),
@@ -367,14 +341,13 @@ export const generateDocument = async (pks) => {
             // PEMBUKAAN
             new Paragraph({
               style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
               children: [
                 new TextRun({
                   text: `${kalimatTanggal}, yang bertanda tangan di bawah ini : `,
-                  bold: false,
                   size: fontSize,
                 }),
               ],
-              alignment: AlignmentType.JUSTIFIED,
             }),
 
             new Paragraph({ text: "" }),
@@ -389,252 +362,132 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: "I.",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "I.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nama",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
+                        new Paragraph({ text: "Nama", style: "Normal" }),
                       ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: ":",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
                           style: "Normal",
+                          alignment: AlignmentType.JUSTIFIED,
                           children: [
                             new TextRun({
                               text: pihakPertama.nama,
                               bold: true,
-                              size: fontSize,
                             }),
                           ],
-                          alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
                 new TableRow({
                   children: [
                     new TableCell({
+                      children: [new Paragraph({ text: "", style: "Normal" })],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({ text: "Jabatan", style: "Normal" }),
+                      ],
+                    }),
+                    new TableCell({
                       children: [
                         new Paragraph({
+                          text: ":",
                           style: "Normal",
-                          children: [new TextRun({ text: "", bold: false })],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: pihakPertama.jabatan,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.jabatan,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
                 new TableRow({
                   children: [
                     new TableCell({
+                      children: [new Paragraph({ text: "", style: "Normal" })],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({ text: "SK. Jabatan", style: "Normal" }),
+                      ],
+                    }),
+                    new TableCell({
                       children: [
                         new Paragraph({
+                          text: ":",
                           style: "Normal",
-                          children: [new TextRun({ text: "", bold: false })],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: pihakPertama.skJabatan,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "SK. Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.skJabatan,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
                 new TableRow({
                   children: [
                     new TableCell({
+                      children: [new Paragraph({ text: " ", style: "Normal" })],
+                    }),
+                    new TableCell({
                       children: [
                         new Paragraph({
+                          text: "Alamat Kantor",
                           style: "Normal",
-                          children: [new TextRun({ text: " ", bold: false })],
+                        }),
+                      ],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: ":",
+                          style: "Normal",
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: pihakPertama.alamat,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Alamat Kantor",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.alamat,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -647,16 +500,8 @@ export const generateDocument = async (pks) => {
             new Paragraph({
               style: "Normal",
               children: [
-                new TextRun({
-                  text: "Selanjutnya yang disebut sebagai",
-                  bold: false,
-                  size: fontSize,
-                }),
-                new TextRun({
-                  text: " PIHAK PERTAMA.",
-                  bold: true,
-                  size: fontSize,
-                }),
+                new TextRun({ text: "Selanjutnya yang disebut sebagai " }),
+                new TextRun({ text: "PIHAK PERTAMA.", bold: true }),
               ],
             }),
 
@@ -672,202 +517,97 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: "II.",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "II.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nama",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
+                        new Paragraph({ text: "Nama", style: "Normal" }),
                       ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: ":",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: `${pihakKedua.nama || ""}`,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.nama}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
                 new TableRow({
                   children: [
                     new TableCell({
+                      children: [new Paragraph({ text: "", style: "Normal" })],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({ text: "Jabatan", style: "Normal" }),
+                      ],
+                    }),
+                    new TableCell({
                       children: [
                         new Paragraph({
+                          text: ":",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: `${pihakKedua.jabatan || ""}`,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.jabatan}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
                 new TableRow({
                   children: [
                     new TableCell({
+                      children: [new Paragraph({ text: "", style: "Normal" })],
+                    }),
+                    new TableCell({
                       children: [
                         new Paragraph({
+                          text: "Alamat Kantor",
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
+                        }),
+                      ],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: ":",
+                          style: "Normal",
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
+                          text: `${pihakKedua.alamat || ""}`,
                           style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Alamat Kantor",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.alamat}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -879,33 +619,19 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: "Selanjutnya yang disebut sebagai",
-                  bold: false,
-                  size: fontSize,
-                }),
-                new TextRun({
-                  text: " PIHAK KEDUA.",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              children: [
+                new TextRun({ text: "Selanjutnya yang disebut sebagai " }),
+                new TextRun({ text: "PIHAK KEDUA.", bold: true }),
+              ],
             }),
 
             new Paragraph({ text: "" }),
 
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut : ",
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut : ",
             }),
 
             new Paragraph({ text: "" }),
@@ -913,554 +639,173 @@ export const generateDocument = async (pks) => {
             // PASAL 1
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 1", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "TUJUAN KERJASAMA",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: "Pasal 1", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "TUJUAN KERJASAMA", bold: true }),
+              ],
             }),
-
             new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${content.judul}. yang selanjutnya akan disebut program kerjasama.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${judulAwalKapital}. yang selanjutnya akan disebut program kerjasama.`,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 2
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 2", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "RUANG LINGKUP KERJASAMA",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 500, 9000],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Ruang lingkup perjanjian Kerjasama ini meliputi :",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      columnSpan: 3,
-                      width: { size: 100, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "a.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Menunjang pelaksanaan Tri Darma Perguruan Tinggi",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "b.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Kegiatan pengabdian dalam rangka ${content.judul}.`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "c.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Kegiatan- kegiatan lain yang dianggap perlu.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
+              children: [
+                new TextRun({ text: "Pasal 2", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "RUANG LINGKUP KERJASAMA", bold: true }),
               ],
-              borders: TableBorders.NONE,
             }),
-
+            new Paragraph({ text: "" }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              text: "Ruang lingkup perjanjian Kerjasama ini meliputi :",
+            }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              indent: { left: 720 },
+              text: "a. Menunjang pelaksanaan Tri Darma Perguruan Tinggi",
+            }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              indent: { left: 720 },
+              text: `b. Kegiatan pengabdian dalam rangka ${judulAwalKapital}.`,
+            }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              indent: { left: 720 },
+              text: "c. Kegiatan- kegiatan lain yang dianggap perlu.",
+            }),
             new Paragraph({ text: "" }),
 
             // PASAL 3
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 3", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PELAKSANAAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: "Pasal 3", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "PELAKSANAAN", bold: true }),
+              ],
             }),
-
             new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Pelaksanaan kerjasama secara rinci dalam bidang-bidang tertentu akan disusun dan dituangkan dalam naskah Perjanjian kerjasama yang disetujui oleh PARA PIHAK dan merupakan bagian yang tidak terpisahkan dari naskah perjanjian kerjasama ini.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: `Pelaksanaan kerjasama secara rinci dalam bidang-bidang tertentu akan disusun dan dituangkan dalam naskah Perjanjian kerjasama yang disetujui oleh PARA PIHAK dan merupakan bagian yang tidak terpisahkan dari naskah perjanjian kerjasama ini.`,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 4
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 4", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PELAKSANAAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 9500],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "1.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Kegiatan-kegiatan yang akan dilaksanakan berdasarkan Perjanjian Kerjasama ini akan dibiayai dari dana yang relevan dari PARA PIHAK.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "2.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Pembiayaan untuk kegiatan yang disepakati tersebut akan diatur dalam Perjanjian Kerjasama tersendiri.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
+              children: [
+                new TextRun({ text: "Pasal 4", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "PEMBIAYAAN", bold: true }),
               ],
-              borders: TableBorders.NONE,
             }),
-
+            new Paragraph({ text: "" }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              text: "1. Kegiatan-kegiatan yang akan dilaksanakan berdasarkan Perjanjian Kerjasama ini akan dibiayai dari dana yang relevan dari PARA PIHAK.",
+            }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              text: "2. Pembiayaan untuk kegiatan yang disepakati tersebut akan diatur dalam Perjanjian Kerjasama tersendiri.",
+            }),
             new Paragraph({ text: "" }),
 
             // PASAL 5
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 5", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "HAK DAN KEWAJIBAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: "Pasal 5", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "HAK DAN KEWAJIBAN", bold: true }),
+              ],
             }),
-
             new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Hak dan kewajiban PARA PIHAK akan dimusyawarahkan bersama sesuai dengan bentuk dan jenis kegiatan yang dilaksanakan.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: `Hak dan kewajiban PARA PIHAK akan dimusyawarahkan bersama sesuai dengan bentuk dan jenis kegiatan yang dilaksanakan.`,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 6
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 6", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "JANGKA WAKTU",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: "Pasal 6", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "JANGKA WAKTU", bold: true }),
+              ],
             }),
-
             new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu 1 (satu) bulan terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu 1 (satu) bulan terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 7
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 7", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PENYELESAIAN PERSELISIHAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: "Pasal 7", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "PENYELESAIAN PERSELISIHAN", bold: true }),
+              ],
             }),
-
             new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Perselisihan timbul sebagai akibat dari pelaksanaan kerjasama ini akan diselesaikan oleh PARA PIHAK secara musyawarah dan mufakat.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
               alignment: AlignmentType.JUSTIFIED,
+              text: `Perselisihan timbul sebagai akibat dari pelaksanaan kerjasama ini akan diselesaikan oleh PARA PIHAK secara musyawarah dan mufakat.`,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 8
             new Paragraph({
               style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 8", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({ text: "PENUTUPAN", bold: true, size: fontSize }),
-              ],
               alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 9500],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "1.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Hal-hal yang bersifat melengkapi dan belum diatur dalam Perjanjian Kerjasama ini akan ditentukan kemudian atas dasar persetujuan PARA PIHAK dan akan dibuat "addendum" tersendiri yang merupakan bagian yang tidak terpisahkan dari Perjanjian Kerjasama ini.`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "2.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Perjanjian Kerjasama ini dibuat dalam rangkap 2 (dua) asli, masing-masing bermaterai cukup dan keduanya mempunyai kekuatan hukum yang sama, ditanda tangani dan dibubuhi cap lembaga masing-masing serta diberikan kepada PARA PIHAK pada saat perjanjian ditanda tangani.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
+              children: [
+                new TextRun({ text: "Pasal 8", bold: true }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "PENUTUP", bold: true }),
               ],
-              borders: TableBorders.NONE,
             }),
-
+            new Paragraph({ text: "" }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              text: `1. Hal-hal yang bersifat melengkapi dan belum diatur dalam Perjanjian Kerjasama ini akan ditentukan kemudian atas dasar persetujuan PARA PIHAK dan akan dibuat "addendum" tersendiri yang merupakan bagian yang tidak terpisahkan dari Perjanjian Kerjasama ini.`,
+            }),
+            new Paragraph({
+              style: "Normal",
+              alignment: AlignmentType.JUSTIFIED,
+              text: "2. Perjanjian Kerjasama ini dibuat dalam rangkap 2 (dua) asli, masing-masing bermaterai cukup dan keduanya mempunyai kekuatan hukum yang sama, ditanda tangani dan dibubuhi cap lembaga masing-masing serta diberikan kepada PARA PIHAK pada saat perjanjian ditanda tangani.",
+            }),
             new Paragraph({ text: "" }),
             new Paragraph({ text: "" }),
 
@@ -1474,44 +819,40 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "PIHAK PERTAMA,",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                          ],
+                          text: "PIHAK PERTAMA,",
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "PIHAK KEDUA",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                          ],
+                          text: "PIHAK KEDUA,",
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph(""),
+                        new Paragraph(""),
+                        new Paragraph(""),
+                        new Paragraph(""),
+                      ],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph(""),
+                        new Paragraph(""),
+                        new Paragraph(""),
+                        new Paragraph(""),
+                      ],
                     }),
                   ],
                 }),
@@ -1520,36 +861,32 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
                             new TextRun({
                               text: pihakPertama.nama,
                               underline: true,
                               bold: true,
-                              size: fontSize,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${pihakKedua.nama}`,
+                              text: pihakKedua.nama || "",
                               underline: true,
                               bold: true,
-                              size: fontSize,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -1558,34 +895,20 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `NIP ${pihakPertama.nip}`,
-                              bold: true,
-                              size: fontSize,
-                            }),
-                          ],
+                          text: `NIP ${pihakPertama.nip}`,
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.jabatan}`,
-                              bold: true,
-                              size: fontSize,
-                            }),
-                          ],
+                          text: pihakKedua.jabatan || "",
                           alignment: AlignmentType.CENTER,
+                          style: "Normal",
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
@@ -1597,13 +920,10 @@ export const generateDocument = async (pks) => {
       ],
     });
 
-    // ============================================================
-    // RESPONSE GENERATION
-    // ============================================================
     const buffer = await Packer.toBuffer(doc);
     return buffer;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error generating document in service:", error);
     throw new Error("Gagal membuat dokumen: " + error.message);
   }
 };

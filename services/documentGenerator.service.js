@@ -16,7 +16,7 @@ import terbilang from "terbilang";
 import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
 import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
 import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
-import { toAllCapital, toCapitalizeFirst } from "./textFormatter";
+import { toAllCapital, toCapitalizeFirst } from "./textFormatter.js";
 
 export const generateDocument = async (pks) => {
   try {
@@ -932,7 +932,7 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${content.judul}. yang selanjutnya akan disebut program kerjasama.`,
+                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(content.judul)}. yang selanjutnya akan disebut program kerjasama.`,
                   bold: false,
                   size: fontSize,
                 }),
@@ -1076,7 +1076,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `Kegiatan pengabdian dalam rangka ${content.judul}.`,
+                              text: `Kegiatan pengabdian dalam rangka ${toCapitalizeFirst(content.judul)}.`,
                               bold: false,
                               size: fontSize,
                             }),

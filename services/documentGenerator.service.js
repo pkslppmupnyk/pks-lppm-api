@@ -13,9 +13,9 @@ import {
   Header,
 } from "docx";
 import terbilang from "terbilang";
-import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
-import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
-import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { toAllCapital, toCapitalizeFirst } from "./textFormatter.js";
 
 export const generateDocument = async (pks) => {
@@ -49,46 +49,67 @@ export const generateDocument = async (pks) => {
       }
     }
 
-    // Buat tabel header untuk menampung logo
-    const logoHeader = new Table({
-      columnWidths: [4500, 4500],
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
+    // ============================================================
+    // FUNGSI UNTUK MEMBUAT HEADER LOGO
+    // ============================================================
+    const createLogoHeader = () => {
+      const logoChildren = [];
+
+      // Logo UPN di kiri
+      logoChildren.push(
+        new TableCell({
           children: [
-            new TableCell({
+            new Paragraph({
               children: [
-                new Paragraph({
-                  children: [
-                    new ImageRun({
-                      data: upnLogo,
-                      transformation: { width: 100, height: 100 },
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
+                new ImageRun({
+                  data: upnLogo,
+                  transformation: {
+                    width: 70,
+                    height: 70,
+                  },
                 }),
               ],
-            }),
-            new TableCell({
-              children: [
-                partnerLogo
-                  ? new Paragraph({
-                      children: [
-                        new ImageRun({
-                          data: partnerLogo,
-                          transformation: { width: 100, height: 100 },
-                        }),
-                      ],
-                      alignment: AlignmentType.RIGHT,
-                    })
-                  : new Paragraph({ text: "" }), // Kosongkan sel jika tidak ada logo mitra
-              ],
+              alignment: AlignmentType.LEFT,
             }),
           ],
-        }),
-      ],
-      borders: TableBorders.NONE,
-    });
+          verticalAlign: "center",
+        })
+      );
+
+      // Logo mitra di kanan (jika ada)
+      logoChildren.push(
+        new TableCell({
+          children: [
+            partnerLogo
+              ? new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: partnerLogo,
+                      transformation: {
+                        width: 70,
+                        height: 70,
+                      },
+                    }),
+                  ],
+                  alignment: AlignmentType.RIGHT,
+                })
+              : new Paragraph({ text: "" }),
+          ],
+          verticalAlign: "center",
+        })
+      );
+
+      return new Table({
+        columnWidths: [4500, 4500],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: logoChildren,
+          }),
+        ],
+        borders: TableBorders.NONE,
+      });
+    };
 
     // ============================================================
     // DATA EXTRACTION
@@ -179,11 +200,12 @@ export const generateDocument = async (pks) => {
               },
             },
           },
+          headers: {
+            default: new Header({
+              children: [createLogoHeader(), new Paragraph({ text: "" })],
+            }),
+          },
           children: [
-            // HEADER
-            logoHeader,
-            new Paragraph({ text: "" }),
-
             new Paragraph({
               style: "Normal",
               children: [
@@ -932,7 +954,9 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(content.judul)}. yang selanjutnya akan disebut program kerjasama.`,
+                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(
+                    content.judul
+                  )}. yang selanjutnya akan disebut program kerjasama.`,
                   bold: false,
                   size: fontSize,
                 }),
@@ -1076,7 +1100,9 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `Kegiatan pengabdian dalam rangka ${toCapitalizeFirst(content.judul)}.`,
+                              text: `Kegiatan pengabdian dalam rangka ${toCapitalizeFirst(
+                                content.judul
+                              )}.`,
                               bold: false,
                               size: fontSize,
                             }),
@@ -1578,7 +1604,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${pihakKedua.jabatan}`,
+                              text: `${toCapitalizeFirst(pihakKedua.jabatan)}`,
                               bold: true,
                               size: fontSize,
                             }),

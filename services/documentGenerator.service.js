@@ -1578,7 +1578,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${pihakKedua.jabatan}`,
+                              text: `${toCapitalizeFirst(pihakKedua.jabatan)}`,
                               bold: true,
                               size: fontSize,
                             }),

@@ -56,11 +56,11 @@ export const generateDocument = async (pks) => {
     const createLogoHeader = () => {
       const logoChildren = [];
 
+      // Logo UPN di kiri
       const upnDimensions = imageSize(upnLogo);
       const upnHeight = 70;
       const upnWidth = (upnDimensions.width / upnDimensions.height) * upnHeight;
 
-      // Logo UPN di kiri
       logoChildren.push(
         new TableCell({
           children: [
@@ -81,34 +81,40 @@ export const generateDocument = async (pks) => {
         })
       );
 
+      // Logo mitra di kanan (jika ada) - ADAPTIF
       if (partnerLogo) {
         const partnerDimensions = imageSize(partnerLogo);
         const partnerHeight = 70;
-        const partnerWidth = (partnerDimensions.width / partnerDimensions.height) * partnerHeight;
-      }
+        const partnerWidth =
+          (partnerDimensions.width / partnerDimensions.height) * partnerHeight;
 
-      // Logo mitra di kanan (jika ada)
-      logoChildren.push(
-        new TableCell({
-          children: [
-            partnerLogo
-              ? new Paragraph({
-                  children: [
-                    new ImageRun({
-                      data: partnerLogo,
-                      transformation: {
-                        width: partnerWidth,
-                        height: partnerHeight,
-                      },
-                    }),
-                  ],
-                  alignment: AlignmentType.RIGHT,
-                })
-              : new Paragraph({ text: "" }),
-          ],
-          verticalAlign: "center",
-        })
-      );
+        logoChildren.push(
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: partnerLogo,
+                    transformation: {
+                      width: partnerWidth,
+                      height: partnerHeight,
+                    },
+                  }),
+                ],
+                alignment: AlignmentType.RIGHT,
+              }),
+            ],
+            verticalAlign: "center",
+          })
+        );
+      } else {
+        logoChildren.push(
+          new TableCell({
+            children: [new Paragraph({ text: "" })],
+            verticalAlign: "center",
+          })
+        );
+      }
 
       return new Table({
         columnWidths: [4500, 4500],
@@ -121,7 +127,6 @@ export const generateDocument = async (pks) => {
         borders: TableBorders.NONE,
       });
     };
-
     // ============================================================
     // DATA EXTRACTION
     // ============================================================

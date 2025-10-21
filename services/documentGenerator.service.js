@@ -64,7 +64,6 @@ export const generateDocument = async (pks) => {
                 new ImageRun({
                   data: upnLogo,
                   transformation: {
-                    width: 70,
                     height: 70,
                   },
                 }),

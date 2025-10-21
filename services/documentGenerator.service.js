@@ -12,6 +12,7 @@ import {
   ImageRun,
   Header,
 } from "docx";
+import imageSize from "image-size";
 import terbilang from "terbilang";
 import fs from "fs";
 import path from "path";
@@ -55,6 +56,10 @@ export const generateDocument = async (pks) => {
     const createLogoHeader = () => {
       const logoChildren = [];
 
+      const upnDimensions = imageSize(upnLogo);
+      const upnHeight = 70;
+      const upnWidth = (upnDimensions.width / upnDimensions.height) * upnHeight;
+
       // Logo UPN di kiri
       logoChildren.push(
         new TableCell({
@@ -64,8 +69,8 @@ export const generateDocument = async (pks) => {
                 new ImageRun({
                   data: upnLogo,
                   transformation: {
-                    width: 70,
-                    height: 70,
+                    width: upnWidth,
+                    height: upnHeight,
                   },
                 }),
               ],
@@ -75,6 +80,12 @@ export const generateDocument = async (pks) => {
           verticalAlign: "center",
         })
       );
+
+      if (partnerLogo) {
+        const partnerDimensions = imageSize(partnerLogo);
+        const partnerHeight = 70;
+        const partnerWidth = (partnerDimensions.width / partnerDimensions.height) * partnerHeight;
+      }
 
       // Logo mitra di kanan (jika ada)
       logoChildren.push(
@@ -86,7 +97,8 @@ export const generateDocument = async (pks) => {
                     new ImageRun({
                       data: partnerLogo,
                       transformation: {
-                        height: 70
+                        width: partnerWidth,
+                        height: partnerHeight,
                       },
                     }),
                   ],

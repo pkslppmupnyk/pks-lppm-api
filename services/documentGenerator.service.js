@@ -16,7 +16,7 @@ import terbilang from "terbilang";
 import fs from "fs"; // <-- 2. Impor 'fs' untuk membaca file
 import path from "path"; // <-- 3. Impor 'path' untuk mengelola path file
 import { fileURLToPath } from "url"; // <-- 4. Impor 'fileURLToPath'
-import { toAllCapital, toCapitalizeFirst } from "./textFormatter";
+import { toAllCapital, toCapitalizeFirst } from "./textFormatter.js";
 
 export const generateDocument = async (pks) => {
   try {

@@ -2117,14 +2117,24 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu (......)*harap diisi terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
+                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu (......)*`,
+                  bold: false,
+                  size: fontSize,
+                }),
+                new TextRun({
+                  text: `harap diisi`,
+                  bold: false,
+                  italics: true, // ← Kata "harap diisi" menjadi italic
+                  size: fontSize,
+                }),
+                new TextRun({
+                  text: ` terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
                   bold: false,
                   size: fontSize,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
             }),
-
             new Paragraph({ text: "" }),
 
             // PASAL 7

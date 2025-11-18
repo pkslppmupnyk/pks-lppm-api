@@ -231,6 +231,12 @@ export const generateDocument = async (pks) => {
                   size: fontSize,
                 }),
                 new TextRun({ break: 1 }),
+                new TextRun({
+                  text: " (Memorandum of Agreement)",
+                  bold: true,
+                  size: fontSize,
+                }),
+                new TextRun({ break: 1 }),
                 new TextRun({ text: " ANTARA", bold: true, size: fontSize }),
               ],
               alignment: AlignmentType.CENTER,

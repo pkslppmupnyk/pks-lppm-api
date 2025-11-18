@@ -414,7 +414,7 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `${kalimatTanggal}, yang bertanda tangan di bawah ini : `,
+                  text: `${kalimatTanggal}, yang bertanda tangan di bawah ini: `,
                   bold: false,
                   size: fontSize,
                 }),
@@ -945,7 +945,7 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut : ",
+                  text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut: ",
                   bold: false,
                   size: fontSize,
                 }),
@@ -1017,7 +1017,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "Ruang lingkup perjanjian Kerjasama ini meliputi :",
+                              text: "Ruang lingkup perjanjian Kerjasama ini meliputi:",
                               bold: false,
                               size: fontSize,
                             }),

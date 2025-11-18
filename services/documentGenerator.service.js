@@ -978,7 +978,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({
                   text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(
                     content.judul
-                  )}. yang selanjutnya akan disebut program kerjasama.`,
+                  )}, yang selanjutnya akan disebut program kerjasama.`,
                   bold: false,
                   size: fontSize,
                 }),
@@ -1176,7 +1176,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "Kegiatan- kegiatan lain yang dianggap perlu.",
+                              text: "Kegiatan-kegiatan lain yang dianggap perlu.",
                               bold: false,
                               size: fontSize,
                             }),

@@ -232,7 +232,7 @@ export const generateDocument = async (pks) => {
                 }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: " (Memorandum of Agreement)",
+                  text: " (MEMORANDUM OF AGREEMENT)",
                   bold: true,
                   size: fontSize,
                 }),
@@ -1070,7 +1070,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "Menunjang pelaksanaan Tri Darma Perguruan Tinggi",
+                              text: "Menunjang pelaksanaan penelitian.",
                               bold: false,
                               size: fontSize,
                             }),
@@ -1232,7 +1232,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({ text: "Pasal 4", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: "PELAKSANAAN",
+                  text: "PEMBIAYAAN",
                   bold: true,
                   size: fontSize,
                 }),
@@ -1354,7 +1354,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "(1)",
+                              text: "1.",
                               bold: false,
                               size: fontSize,
                             }),
@@ -1628,7 +1628,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "(2)",
+                              text: "2.",
                               bold: false,
                               size: fontSize,
                             }),
@@ -1847,7 +1847,7 @@ export const generateDocument = async (pks) => {
                           style: "Normal",
                           children: [
                             new TextRun({
-                              text: "(3)",
+                              text: "3.",
                               bold: false,
                               size: fontSize,
                             }),
@@ -2117,7 +2117,7 @@ export const generateDocument = async (pks) => {
               style: "Normal",
               children: [
                 new TextRun({
-                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu 1 (satu) bulan terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
+                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu (......)*harap diisi terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
                   bold: false,
                   size: fontSize,
                 }),

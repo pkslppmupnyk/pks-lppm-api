@@ -1331,7 +1331,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({ text: "Pasal 5", bold: true, size: fontSize }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: "HAK DAN KEWAJIBAN",
+                  text: "TUGAS DAN TANGGUNGJAWAB",
                   bold: true,
                   size: fontSize,
                 }),
@@ -1341,16 +1341,757 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Hak dan kewajiban PARA PIHAK akan dimusyawarahkan bersama sesuai dengan bentuk dan jenis kegiatan yang dilaksanakan.`,
-                  bold: false,
-                  size: fontSize,
+            new Table({
+              columnWidths: [500, 500, 9000],
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                // PIHAK KESATU Header
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "(1)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "PIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      columnSpan: 2,
+                      width: { size: 95, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KESATU - Item a
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "a)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Mengolah data dan informasi yang diperoleh dari PIHAK KEDUA;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KESATU - Item b
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "b)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Melaksanakan penyelenggaraan pelatihan, penyuluhan, dan pendampingan masyarakat desa dalam rangka pengembangan sumberdaya manusia;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KESATU - Item c
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "c)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: `Melaksanakan Penelitian terkait ${toCapitalizeFirst(
+                                content.judul
+                              )};`,
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KESATU - Item d
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "d)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Melaksanakan kegiatan pemberdayaan masyarakat.",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+
+                // Empty row for spacing
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                        }),
+                      ],
+                      columnSpan: 3,
+                    }),
+                  ],
+                }),
+
+                // PIHAK KEDUA Header
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "(2)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "PIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      columnSpan: 2,
+                      width: { size: 95, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KEDUA - Item a
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "a)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Mengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KEDUA - Item b
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "b)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Memfasilitasi penyelenggaraan penelitian, pelatihan, penyuluhan, dan pendampingan masyarakat desa dalam rangka pengembangan sumberdaya manusia;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PIHAK KEDUA - Item c
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "c)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Memfasilitasi kegiatan pemberdayaan masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+
+                // Empty row for spacing
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                        }),
+                      ],
+                      columnSpan: 3,
+                    }),
+                  ],
+                }),
+
+                // PARA PIHAK Header
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "(3)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "PARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab:",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      columnSpan: 2,
+                      width: { size: 95, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PARA PIHAK - Item a
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "a)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Melakukan pendampingan Masyarakat Desa dalam rangka pengembangan sumberdaya manusia;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PARA PIHAK - Item b
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "b)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: `Penelitian terkait ${toCapitalizeFirst(
+                                content.judul
+                              )};`,
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PARA PIHAK - Item c
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "c)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Melaksanakan kegiatan pemberdayaan masyarakat;",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
+                }),
+                // PARA PIHAK - Item d
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: " ",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "d)",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 5, type: WidthType.PERCENTAGE },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          style: "Normal",
+                          children: [
+                            new TextRun({
+                              text: "Menyusun laporan pelaksanaan kegiatan.",
+                              bold: false,
+                              size: fontSize,
+                            }),
+                          ],
+                          alignment: AlignmentType.JUSTIFIED,
+                        }),
+                      ],
+                      width: { size: 90, type: WidthType.PERCENTAGE },
+                    }),
+                  ],
                 }),
               ],
-              alignment: AlignmentType.JUSTIFIED,
+              borders: TableBorders.NONE,
             }),
 
             new Paragraph({ text: "" }),

@@ -118,7 +118,7 @@ export const updatePKS = async (req, res) => {
     // --- MITIGASI 2: Logic Generasi Nomor ---
     // Hanya generate jika: Status jadi 'approved' DAN belum punya nomor
     if (
-      updateData.properties?.status === "approved" &&
+      updateData.properties?.status === "menunggu fokumen" &&
       !alreadyHasNumber // <--- PENAHAN UTAMA: Lewati jika sudah ada nomor
     ) {
       // 1. Ambil Tahun (dari Config atau Date)

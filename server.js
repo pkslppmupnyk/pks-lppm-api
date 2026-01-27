@@ -10,6 +10,7 @@ dotenv.config();
 //import route
 import pksRouter from "./routes/pks.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import adminRouter from "./routes/admin.routes.js";
 
 // cron
 import { startReminderCronJob } from "./services/cron.service.js";

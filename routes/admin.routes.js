@@ -15,11 +15,11 @@ const adminRouter = Router();
 adminRouter.use(protect);
 
 // Konfigurasi Tahun
-adminRouter.post("/config/year", setActiveYear);
+adminRouter.put("/config/year", setActiveYear);
 adminRouter.get("/config/year", getActiveYear);
 
 // Konfigurasi Sequence (Reset/Set)
-adminRouter.post("/config/sequence", setLastSequence);
+adminRouter.put("/config/sequence", setLastSequence);
 adminRouter.get("/config/sequence", getLastSequence);
 
 // Generate Nomor (Standalone Endpoint)

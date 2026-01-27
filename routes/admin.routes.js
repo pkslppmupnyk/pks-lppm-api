@@ -5,6 +5,7 @@ import {
   setActiveYear,
   getActiveYear,
   setLastSequence,
+  getLastSequence,
   generatePksNumber,
 } from "../controllers/admin.controller.js";
 
@@ -19,6 +20,7 @@ adminRouter.get("/config/year", getActiveYear);
 
 // Konfigurasi Sequence (Reset/Set)
 adminRouter.post("/config/sequence", setLastSequence);
+adminRouter.get("/config/sequence", getLastSequence);
 
 // Generate Nomor (Standalone Endpoint)
 adminRouter.get("/generate-number", generatePksNumber);

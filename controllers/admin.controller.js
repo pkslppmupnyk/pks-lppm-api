@@ -64,6 +64,18 @@ export const setLastSequence = async (req, res) => {
   }
 };
 
+// Get Nomor Urut Terakhir (Untuk ditampilkan di form edit)
+export const getLastSequence = async (req, res) => {
+  try {
+    const docNumber = await DocNumber.findById("PKS");
+    // Jika belum ada, default 0
+    const currentSeq = docNumber ? docNumber.seq : 0;
+    res.json({ seq: currentSeq });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // --- FUNGSI GENERATOR NOMOR (TERPISAH) ---
 
 // Generate Nomor Baru (Tanpa save ke PKS, hanya preview/reserve)

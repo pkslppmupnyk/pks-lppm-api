@@ -166,7 +166,7 @@ export const updatePKS = async (req, res) => {
     const updated = await PKS.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true, runValidators: true, context: "query" },
+      { new: true },
     );
 
     res.json({

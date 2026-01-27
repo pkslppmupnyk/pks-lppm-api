@@ -1,5 +1,6 @@
 import PKS from "../models/pks.model.js";
 import DocNumber from "../models/numbering.model.js";
+import Config from "../models/config.model.js"; // <--- TAMBAHKAN INI
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -118,7 +119,7 @@ export const updatePKS = async (req, res) => {
     // --- MITIGASI 2: Logic Generasi Nomor ---
     // Hanya generate jika: Status jadi 'approved' DAN belum punya nomor
     if (
-      updateData.properties?.status === "menunggu fokumen" &&
+      updateData.properties?.status === "menunggu dokumen" &&
       !alreadyHasNumber // <--- PENAHAN UTAMA: Lewati jika sudah ada nomor
     ) {
       // 1. Ambil Tahun (dari Config atau Date)

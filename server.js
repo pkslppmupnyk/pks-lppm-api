@@ -21,6 +21,12 @@ connectDB();
 
 const server = express();
 
+// --- TAMBAHKAN BARIS INI (SOLUSI) ---
+// Memberitahu Express untuk mempercayai header dari proxy (Nginx/Apache)
+// Angka 1 berarti mempercayai 1 hop di belakang (umumnya load balancer/reverse proxy)
+server.set("trust proxy", 1);
+// ------------------------------------
+
 const allowedOrigins = [
   "https://pkslppmupnyk.io", // Domain frontend utama Anda
   "https://www.pkslppmupnyk.io", // Varian dengan www

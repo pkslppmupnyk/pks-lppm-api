@@ -8,7 +8,8 @@ const pksSchema = new mongoose.Schema(
     content: {
       nomor: {
         type: String,
-        unique: true,
+        default: "",
+        // unique: true,
       },
       judul: {
         type: String,
@@ -131,7 +132,7 @@ const pksSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 pksSchema.index({ "properties.status": 1, "properties.uploadDate": -1 });

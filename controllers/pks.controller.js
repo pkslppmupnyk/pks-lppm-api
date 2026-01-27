@@ -23,35 +23,24 @@ const deleteFileFromServer = async (fileName) => {
 // CREATE
 export const createPKS = async (req, res) => {
   try {
-    // 1. Buat instance PKS baru dengan nomor sementara untuk validasi
-    const pksTemp = new PKS({
+    // Langsung simpan data tanpa generate nomor
+    // Nomor akan default "" sesuai model, atau bisa diset "-"
+    const newPks = new PKS({
       ...req.body,
       content: {
         ...req.body.content,
-        nomor: "TEMP",
+        nomor: "", // Kosongkan dulu
+      },
+      properties: {
+        ...req.body.properties,
+        status: "draft", // Paksa status awal jadi draft
       },
     });
 
-    // 2. Trigger validasi Mongoose tanpa menyimpan ke DB
-    await pksTemp.validate();
-
-    // 3. Jika valid, generate nomor PKS yang sebenarnya
-    const seq = await DocNumber.getNextSeq("PKS");
-    const year = new Date().getFullYear();
-    const cakupan =
-      pksTemp.properties.cakupanKerjaSama === "luar negeri"
-        ? "KS.00.01"
-        : "KS.00.00";
-    const nomor = `${seq}/UN62.21/${cakupan}/${year}`;
-
-    // 4. Tetapkan nomor yang benar
-    pksTemp.content.nomor = nomor;
-
-    // 5. Simpan dokumen ke database
-    const saved = await pksTemp.save();
+    const saved = await newPks.save();
 
     res.status(201).json({
-      message: "PKS created successfully",
+      message: "PKS draft created successfully",
       data: saved,
     });
   } catch (err) {
@@ -101,48 +90,89 @@ export const getPKSById = async (req, res) => {
 
 export const updatePKS = async (req, res) => {
   try {
-    const pks = await PKS.findById(req.params.id);
-    if (!pks) {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Ambil data PKS existing
+    const existingPks = await PKS.findById(id);
+    if (!existingPks) {
       return res.status(404).json({ message: "PKS not found" });
     }
 
-    const updateData = req.body;
+    // --- VARIABEL KUNCI MITIGASI ---
+    // Cek apakah PKS ini sudah memiliki nomor yang valid
+    const alreadyHasNumber =
+      existingPks.content?.nomor &&
+      existingPks.content.nomor !== "" &&
+      existingPks.content.nomor !== "-" &&
+      existingPks.content.nomor !== "TEMP"; // Jaga-jaga jika ada sisa data lama
 
-    // Cek jika cakupan kerja sama diubah
-    if (
-      updateData.properties &&
-      updateData.properties.cakupanKerjaSama &&
-      updateData.properties.cakupanKerjaSama !== pks.properties.cakupanKerjaSama
-    ) {
-      // Regenerasi nomor jika cakupan berubah
-      const currentNomorParts = pks.content.nomor.split("/");
-      const seq = currentNomorParts[0];
-      const year = currentNomorParts[3];
-      const newCakupanCode =
-        updateData.properties.cakupanKerjaSama === "luar negeri"
-          ? "KS.00.01"
-          : "KS.00.00";
-
-      const newNomor = `${seq}/UN62.21/${newCakupanCode}/${year}`;
-
-      if (!updateData.content) {
-        updateData.content = {};
-      }
-      updateData.content.nomor = newNomor;
-    } else {
-      // Pertahankan nomor yang ada jika cakupan tidak berubah
-      if (updateData.content) {
-        updateData.content.nomor = pks.content.nomor;
+    // --- MITIGASI 1: Cegah Input Manual/Paksa Nomor ---
+    // Jika nomor sudah ada, hapus field 'nomor' dari request body agar tidak tertimpa
+    if (alreadyHasNumber) {
+      if (updateData.content && updateData.content.nomor) {
+        delete updateData.content.nomor;
       }
     }
 
+    // --- MITIGASI 2: Logic Generasi Nomor ---
+    // Hanya generate jika: Status jadi 'approved' DAN belum punya nomor
+    if (
+      updateData.properties?.status === "approved" &&
+      !alreadyHasNumber // <--- PENAHAN UTAMA: Lewati jika sudah ada nomor
+    ) {
+      // 1. Ambil Tahun (dari Config atau Date)
+      let yearConfig = await Config.findOne({ key: "pks_active_year" });
+      const year = yearConfig ? yearConfig.value : new Date().getFullYear();
+
+      // 2. Ambil Sequence Baru
+      const seqData = await DocNumber.findOneAndUpdate(
+        { _id: "PKS" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true },
+      );
+
+      // 3. Tentukan Kode Cakupan
+      const cakupanVal =
+        updateData.properties?.cakupanKerjaSama ||
+        existingPks.properties.cakupanKerjaSama;
+      const cakupanCode =
+        cakupanVal === "luar negeri" ? "KS.00.01" : "KS.00.00";
+
+      // 4. Format Nomor
+      const generatedNomor = `${seqData.seq}/UN62.21/${cakupanCode}/${year}`;
+
+      // 5. Masukkan ke object update
+      if (!updateData.content) updateData.content = {};
+      updateData.content.nomor = generatedNomor;
+    }
+
+    // --- MITIGASI 3: Hapus/Modifikasi Logika Regenerasi Lama ---
+    // Kode asli Anda memiliki logika: jika cakupan berubah, nomor berubah.
+    // Kita ubah agar logika itu HANYA jalan jika nomor BELUM ada.
+    if (
+      updateData.properties?.cakupanKerjaSama &&
+      updateData.properties.cakupanKerjaSama !==
+        existingPks.properties.cakupanKerjaSama &&
+      !alreadyHasNumber // <--- TAMBAHAN PENTING: Jangan ubah nomor jika sudah ada
+    ) {
+      // Jika status draft/belum ada nomor, dan user ganti cakupan,
+      // kita tidak perlu generate nomor baru disini, karena nomor akan digenerate saat 'approved'.
+      // Jadi blok ini bisa dikosongkan atau dihapus untuk flow baru ini.
+    }
+
+    // Lakukan Update ke Database
     const updated = await PKS.findByIdAndUpdate(
-      req.params.id,
+      id,
       { $set: updateData },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    res.json({ message: "PKS updated successfully", data: updated });
+    res.json({
+      message: "PKS updated successfully",
+      data: updated,
+      generatedNumber: updateData.content?.nomor || null,
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

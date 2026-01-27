@@ -70,6 +70,9 @@ server.use("/api/auth", authRouter);
 //  routes PKS dan File Upload
 server.use("/api/pks", pksRouter);
 
+//  routes admin
+server.use("/api/admin", adminRouter);
+
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
@@ -77,6 +80,6 @@ server.listen(PORT, () => {
   startReminderCronJob(); // Jalankan cron job
   // Pesan konfirmasi bahwa cron job aktif
   console.log(
-    "⏰ Email reminder cron job is active. Checking daily at 08:00 AM."
+    "⏰ Email reminder cron job is active. Checking daily at 08:00 AM.",
   );
 });

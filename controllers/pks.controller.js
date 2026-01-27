@@ -144,8 +144,11 @@ export const updatePKS = async (req, res) => {
       const generatedNomor = `${seqData.seq}/UN62.21/${cakupanCode}/${year}`;
 
       // 5. Masukkan ke object update
-      if (!updateData.content) updateData.content = {};
-      updateData.content.nomor = generatedNomor;
+      updateData.content = {
+        ...(existingPks.content ? existingPks.content.toObject() : {}), // Ambil data lama (Judul, Tgl, dll)
+        ...(updateData.content || {}), // Gabung dengan input baru dari frontend (jika ada)
+        nomor: generatedNomor, // Update nomornya
+      };
     }
 
     // --- MITIGASI 3: Hapus/Modifikasi Logika Regenerasi Lama ---
@@ -166,7 +169,7 @@ export const updatePKS = async (req, res) => {
     const updated = await PKS.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true },
+      { new: true, runValidators: true, context: "query" },
     );
 
     res.json({

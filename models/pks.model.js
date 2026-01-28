@@ -1,4 +1,4 @@
-// pkslppmupnyk/pks-lppm-api/pks-lppm-api-cdbb3090bc26c697114ce7081d0e9d3e3badd715/models/pks.model.js
+// models/pks.model.js
 import mongoose from "mongoose";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -9,7 +9,6 @@ const pksSchema = new mongoose.Schema(
       nomor: {
         type: String,
         default: "",
-        // unique: true,
       },
       judul: {
         type: String,
@@ -50,6 +49,61 @@ const pksSchema = new mongoose.Schema(
         trim: true,
       },
     },
+    // --- DATA MOU MENAUNGI (BARU) ---
+    mou: {
+      hasMoU: {
+        type: Boolean,
+        default: false,
+      },
+      nomorUpn: {
+        type: String,
+        trim: true,
+        // Wajib jika hasMoU = true
+        required: [
+          function () {
+            return this.mou?.hasMoU === true;
+          },
+          "Nomor MoU UPN wajib diisi jika ada MoU menaungi",
+        ],
+      },
+      nomorMitra: {
+        type: String,
+        trim: true,
+        // Wajib jika hasMoU = true
+        required: [
+          function () {
+            return this.mou?.hasMoU === true;
+          },
+          "Nomor MoU Mitra wajib diisi jika ada MoU menaungi",
+        ],
+      },
+      judul: {
+        type: String,
+        trim: true,
+        // Wajib jika hasMoU = true
+        required: [
+          function () {
+            return this.mou?.hasMoU === true;
+          },
+          "Judul MoU wajib diisi jika ada MoU menaungi",
+        ],
+      },
+      tanggalMulai: {
+        type: Date,
+        // Wajib jika hasMoU = true
+        required: [
+          function () {
+            return this.mou?.hasMoU === true;
+          },
+          "Tanggal Mulai MoU wajib diisi jika ada MoU menaungi",
+        ],
+      },
+      tanggalSelesai: {
+        type: Date,
+        // Tetap opsional meskipun ada MoU
+      },
+    },
+    // --------------------------------
     properties: {
       uploadDate: {
         type: Date,
@@ -87,12 +141,10 @@ const pksSchema = new mongoose.Schema(
         match: [emailRegex, "Format email tidak valid"],
         index: true,
       },
-      // --- TAMBAHKAN FIELD BARU DI SINI ---
       telepon: {
         type: String,
         trim: true,
       },
-      // ------------------------------------
       reminderDate: {
         type: Date,
         index: true,

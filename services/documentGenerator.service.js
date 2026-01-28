@@ -38,7 +38,7 @@ export const generateDocument = async (pks) => {
       const partnerLogoPath = path.join(
         __dirname,
         "../uploads/logos",
-        pks.logoUpload.fileName
+        pks.logoUpload.fileName,
       );
       try {
         // Cek apakah file logo mitra benar-benar ada sebelum dibaca
@@ -78,7 +78,7 @@ export const generateDocument = async (pks) => {
             }),
           ],
           verticalAlign: "center",
-        })
+        }),
       );
 
       // Logo mitra di kanan (jika ada) - ADAPTIF
@@ -105,14 +105,14 @@ export const generateDocument = async (pks) => {
               }),
             ],
             verticalAlign: "center",
-          })
+          }),
         );
       } else {
         logoChildren.push(
           new TableCell({
             children: [new Paragraph({ text: "" })],
             verticalAlign: "center",
-          })
+          }),
         );
       }
 
@@ -153,10 +153,10 @@ export const generateDocument = async (pks) => {
 
     // Date formatting
     const namaHari = capitalizeEachWord(
-      tanggal.toLocaleDateString("id-ID", { weekday: "long" })
+      tanggal.toLocaleDateString("id-ID", { weekday: "long" }),
     );
     const namaBulan = capitalizeEachWord(
-      tanggal.toLocaleDateString("id-ID", { month: "long" })
+      tanggal.toLocaleDateString("id-ID", { month: "long" }),
     );
     const tanggalHuruf = capitalizeEachWord(terbilang(tanggal.getDate()));
     const tahunHuruf = capitalizeEachWord(terbilang(tanggal.getFullYear()));
@@ -940,7 +940,128 @@ export const generateDocument = async (pks) => {
             }),
 
             new Paragraph({ text: "" }),
-
+            // ============================================================
+            // >>> GANTI BAGIAN INI (LOGIKA MoU) <<<
+            // ============================================================
+            ...(pks.mou?.hasMoU
+              ? [
+                  // --- OPSI A: JIKA ADA MoU ---
+                  new Paragraph({
+                    style: "Normal",
+                    children: [
+                      new TextRun({
+                        text: "PIHAK PERTAMA dan PIHAK KEDUA selanjutnya secara sendiri–sendiri disebut “PIHAK” dan secara bersama – sama disebut “PARA PIHAK”.",
+                        size: fontSize,
+                      }),
+                    ],
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({ text: "" }),
+                  // Poin 1
+                  new Paragraph({
+                    style: "Normal",
+                    children: [
+                      new TextRun({
+                        text: "1.\tBahwa PARA PIHAK bermaksud untuk memanfaatkan ilmu pengetahuan dan teknologi dalam penyelenggaraan Penelitian dan Pengabdian Masyarakat;",
+                        size: fontSize,
+                      }),
+                    ],
+                    alignment: AlignmentType.JUSTIFIED,
+                    indent: { left: 720, hanging: 360 }, // Hanging indent agar rapi
+                  }),
+                  // Poin 2 (Detail MoU)
+                  new Paragraph({
+                    style: "Normal",
+                    children: [
+                      new TextRun({
+                        text: "2.\tBahwa Perjanjian Kerja Sama ini merupakan tindak lanjut Nota Kesepahaman Bersama antara ",
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: `${pks.pihakKedua.instansi}`, // Nama Mitra
+                        bold: true,
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: " dan Universitas Pembangunan Nasional Veteran Yogyakarta Nomor: ",
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: `${pks.mou.nomorMitra || ".........."}`,
+                        bold: true,
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: " dan Nomor ",
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: `${pks.mou.nomorUpn || ".........."}`,
+                        bold: true,
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: " tentang ",
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: `${pks.mou.judul || ".........."}`,
+                        bold: true,
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: " tanggal ",
+                        size: fontSize,
+                      }),
+                      new TextRun({
+                        text: `${
+                          pks.mou.tanggalMulai
+                            ? new Date(pks.mou.tanggalMulai).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                },
+                              )
+                            : ".........."
+                        }.`,
+                        size: fontSize,
+                      }),
+                    ],
+                    alignment: AlignmentType.JUSTIFIED,
+                    indent: { left: 720, hanging: 360 },
+                  }),
+                  new Paragraph({ text: "" }),
+                  // Kalimat Kesepakatan
+                  new Paragraph({
+                    style: "Normal",
+                    children: [
+                      new TextRun({
+                        text: "PARA PIHAK dengan ini sepakat secara bersama-sama dengan kedudukan dan kewenangan masing-masing untuk mengadakan kesepakatan bersama yang selanjutnya disebut “Perjanjian Kerja Sama” dengan berpedoman kepada ketentuan-ketentuan yang diuraikan sebagai berikut:",
+                        size: fontSize,
+                      }),
+                    ],
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                ]
+              : [
+                  // --- OPSI B: TIDAK ADA MoU (DEFAULT) ---
+                  new Paragraph({
+                    style: "Normal",
+                    children: [
+                      new TextRun({
+                        text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut: ",
+                        bold: false,
+                        size: fontSize,
+                      }),
+                    ],
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                ]),
+            // ============================================================
+            // >>> BATAS AKHIR GANTI <<<
+            // ============================================================
             new Paragraph({
               style: "Normal",
               children: [
@@ -977,7 +1098,7 @@ export const generateDocument = async (pks) => {
               children: [
                 new TextRun({
                   text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(
-                    content.judul
+                    content.judul,
                   )}, yang selanjutnya akan disebut program kerjasama.`,
                   bold: false,
                   size: fontSize,
@@ -1123,7 +1244,7 @@ export const generateDocument = async (pks) => {
                           children: [
                             new TextRun({
                               text: `Kegiatan pengabdian dalam rangka ${toCapitalizeFirst(
-                                content.judul
+                                content.judul,
                               )}.`,
                               bold: false,
                               size: fontSize,
@@ -1531,7 +1652,7 @@ export const generateDocument = async (pks) => {
                           children: [
                             new TextRun({
                               text: `Melaksanakan Penelitian terkait ${toCapitalizeFirst(
-                                content.judul
+                                content.judul,
                               )};`,
                               bold: false,
                               size: fontSize,
@@ -1971,7 +2092,7 @@ export const generateDocument = async (pks) => {
                           children: [
                             new TextRun({
                               text: `Penelitian terkait ${toCapitalizeFirst(
-                                content.judul
+                                content.judul,
                               )};`,
                               bold: false,
                               size: fontSize,

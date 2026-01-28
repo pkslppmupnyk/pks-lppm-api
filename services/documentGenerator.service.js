@@ -978,8 +978,8 @@ export const generateDocument = async (pks) => {
                         size: fontSize,
                       }),
                       new TextRun({
-                        text: `${pks.pihakKedua.instansi}`, // Nama Mitra
-                        bold: true,
+                        text: `${toCapitalizeFirst(pks.pihakKedua.instansi)}`, // Nama Mitra
+                        bold: false,
                         size: fontSize,
                       }),
                       new TextRun({
@@ -988,7 +988,7 @@ export const generateDocument = async (pks) => {
                       }),
                       new TextRun({
                         text: `${pks.mou.nomorMitra || ".........."}`,
-                        bold: true,
+                        bold: false,
                         size: fontSize,
                       }),
                       new TextRun({
@@ -997,7 +997,7 @@ export const generateDocument = async (pks) => {
                       }),
                       new TextRun({
                         text: `${pks.mou.nomorUpn || ".........."}`,
-                        bold: true,
+                        bold: false,
                         size: fontSize,
                       }),
                       new TextRun({
@@ -1005,8 +1005,8 @@ export const generateDocument = async (pks) => {
                         size: fontSize,
                       }),
                       new TextRun({
-                        text: `${pks.mou.judul || ".........."}`,
-                        bold: true,
+                        text: `${toCapitalizeFirst(pks.mou.judul) || ".........."}`,
+                        bold: false,
                         size: fontSize,
                       }),
                       new TextRun({

@@ -15,6 +15,32 @@ const pksSchema = new mongoose.Schema(
         required: [true, "Judul perjanjian is required"],
         trim: true,
       },
+      bentukKerjaSama: {
+        type: [String],
+        enum: ["Penelitian", "Pengabdian Masyarakat"],
+        validate: {
+          validator: function (arr) {
+            return arr && arr.length > 0 && arr.length <= 2;
+          },
+          message:
+            "Bentuk kerja sama harus memilih minimal 1 dan maksimal 2 jenis",
+        },
+        required: [true, "Bentuk kerja sama is required"],
+      },
+      jenisPengabdian: {
+        type: String,
+        enum: [
+          "Pengabdian bagi Masyarakat Umum",
+          "Pengabdian bagi Masyarakat Industri",
+          "Pengabdian bagi Masyarakat Kerja Sama Pemerintah",
+        ],
+        required: [
+          function () {
+            return this.bentukKerjaSama?.includes("Pengabdian Masyarakat");
+          },
+          "Jenis pengabdian wajib diisi jika bentuk kerja sama adalah Pengabdian Masyarakat",
+        ],
+      },
       tanggal: {
         type: Date,
         required: [true, "Tanggal is required"],

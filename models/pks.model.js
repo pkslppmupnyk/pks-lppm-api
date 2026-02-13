@@ -34,6 +34,8 @@ const pksSchema = new mongoose.Schema(
           "Pengabdian bagi Masyarakat Industri",
           "Pengabdian bagi Masyarakat Kerja Sama Pemerintah",
         ],
+        // REVISI DI SINI: Ubah string kosong "" jadi undefined agar enum tidak error
+        set: (v) => (v === "" ? undefined : v),
         required: [
           function () {
             return this.bentukKerjaSama?.includes("Pengabdian Masyarakat");

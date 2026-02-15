@@ -11,6 +11,8 @@ import {
   WidthType,
   ImageRun,
   Header,
+  Footer,
+  PageNumber,
 } from "docx";
 import imageSize from "image-size";
 import terbilang from "terbilang";
@@ -25,14 +27,11 @@ export const generateDocument = async (pks) => {
     const __dirname = path.dirname(__filename);
 
     // ============================================================
-    // PERSIAPAN LOGO
+    // 1. PERSIAPAN LOGO (TIDAK BERUBAH)
     // ============================================================
-
-    // Baca logo UPN dari folder public
     const upnLogoPath = path.join(__dirname, "../public/images/logo_upn.png");
     const upnLogo = fs.readFileSync(upnLogoPath);
 
-    // Baca logo mitra jika ada
     let partnerLogo = null;
     if (pks.logoUpload && pks.logoUpload.fileName) {
       const partnerLogoPath = path.join(
@@ -41,24 +40,20 @@ export const generateDocument = async (pks) => {
         pks.logoUpload.fileName,
       );
       try {
-        // Cek apakah file logo mitra benar-benar ada sebelum dibaca
         if (fs.existsSync(partnerLogoPath)) {
           partnerLogo = fs.readFileSync(partnerLogoPath);
         }
       } catch (e) {
-        console.error("Logo mitra tidak ditemukan, akan dilewati.");
+        console.error("Logo mitra tidak ditemukan.");
       }
     }
 
-    // ============================================================
-    // FUNGSI UNTUK MEMBUAT HEADER LOGO
-    // ============================================================
     const createLogoHeader = () => {
       const logoChildren = [];
 
-      // Logo UPN di kiri
+      // Logo UPN (Kiri)
       const upnDimensions = imageSize(upnLogo);
-      const upnHeight = 70;
+      const upnHeight = 60; // Sedikit diperkecil agar rapi
       const upnWidth = (upnDimensions.width / upnDimensions.height) * upnHeight;
 
       logoChildren.push(
@@ -68,10 +63,7 @@ export const generateDocument = async (pks) => {
               children: [
                 new ImageRun({
                   data: upnLogo,
-                  transformation: {
-                    width: upnWidth,
-                    height: upnHeight,
-                  },
+                  transformation: { width: upnWidth, height: upnHeight },
                 }),
               ],
               alignment: AlignmentType.LEFT,
@@ -81,10 +73,10 @@ export const generateDocument = async (pks) => {
         }),
       );
 
-      // Logo mitra di kanan (jika ada) - ADAPTIF
+      // Logo Mitra (Kanan)
       if (partnerLogo) {
         const partnerDimensions = imageSize(partnerLogo);
-        const partnerHeight = 70;
+        const partnerHeight = 60;
         const partnerWidth =
           (partnerDimensions.width / partnerDimensions.height) * partnerHeight;
 
@@ -109,49 +101,52 @@ export const generateDocument = async (pks) => {
         );
       } else {
         logoChildren.push(
-          new TableCell({
-            children: [new Paragraph({ text: "" })],
-            verticalAlign: "center",
-          }),
+          new TableCell({ children: [], verticalAlign: "center" }),
         );
       }
 
       return new Table({
         columnWidths: [4500, 4500],
         width: { size: 100, type: WidthType.PERCENTAGE },
-        rows: [
-          new TableRow({
-            children: logoChildren,
-          }),
-        ],
+        rows: [new TableRow({ children: logoChildren })],
         borders: TableBorders.NONE,
       });
     };
-    // ============================================================
-    // DATA EXTRACTION
-    // ============================================================
-
-    const data = pks; // langsung pakai object PKS dari controller
 
     // ============================================================
-    // VARIABLE INITIALIZATION
-    // Sesuaikan variabel di sini untuk lingkungan baru
+    // 2. DATA PREPARATION (LOGIKA DIBALIK DISINI)
     // ============================================================
 
-    // Content data
+    const data = pks;
     const content = data.content;
-    const tanggal = content.tanggal; // ← Ubah ini sesuai kebutuhan (misal: pks.date)
-    const formattedNomor = content.nomor.replace(/-/g, "/");
+    const tanggal = new Date(content.tanggal); // Pastikan object Date
+    const formattedNomorUPN = content.nomor
+      ? content.nomor.replace(/-/g, "/")
+      : "....................";
 
-    // Pihak Kedua data
-    const pihakKedua = data.pihakKedua;
-
-    // Helper function
-    const capitalizeEachWord = (str) => {
-      return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    // --- LOGIKA PEMBALIKAN PIHAK ---
+    // PIHAK KESATU = MITRA (Data dari Database)
+    const pihakKesatu = {
+      instansi: data.pihakKedua.instansi,
+      nama: data.pihakKedua.nama,
+      jabatan: data.pihakKedua.jabatan,
+      alamat: data.pihakKedua.alamat,
+      nomorDokumen: data.pihakKedua.nomor || "....................", // Nomor surat mitra
     };
 
-    // Date formatting
+    // PIHAK KEDUA = UPN (Data Statis sesuai Template Baru)
+    const pihakKedua = {
+      instansi: `UPN "Veteran" Yogyakarta`,
+      nama: "Prof. Dr. Dyah Sugandini, SE, M.Si", // Update Gelar Prof
+      jabatan: "Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat",
+      // Teks lengkap SK Jabatan sesuai template
+      deskripsi: `Selaku Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta, berdasarkan Surat Keputusan Rektor Universitas pembangunan Nasional "Veteran" Yogyakarta Nomor 1569/UN62/KP/2024 tanggal 20 Maret 2024, dalam jabatan tersebut bertindak untuk dan atas nama Universitas Pembangunan Nasional "Veteran" Yogyakarta, berkedudukan di Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283, untuk selanjutnya disebut PIHAK KEDUA.`,
+      nip: "19710617 202121 2 001",
+    };
+
+    // Helper Text
+    const capitalizeEachWord = (str) =>
+      str.replace(/\b\w/g, (char) => char.toUpperCase());
     const namaHari = capitalizeEachWord(
       tanggal.toLocaleDateString("id-ID", { weekday: "long" }),
     );
@@ -160,29 +155,13 @@ export const generateDocument = async (pks) => {
     );
     const tanggalHuruf = capitalizeEachWord(terbilang(tanggal.getDate()));
     const tahunHuruf = capitalizeEachWord(terbilang(tanggal.getFullYear()));
-    const formatAngka = `${tanggal.getDate().toString().padStart(2, "0")}-${(
-      tanggal.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}-${tanggal.getFullYear()}`;
-    const kalimatTanggal = `${namaHari}, tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} (${formatAngka})`;
 
-    // Pihak Pertama data (static - bisa dipindah ke config jika perlu)
-    const pihakPertama = {
-      nama: "Dr. Dyah Sugandini, SE, M.Si",
-      jabatan: `Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta`,
-      skJabatan: `Surat Keputusan Rektor Universitas pembangunan Nasional "Veteran" Yogyakarta Nomor 1569/UN62/KP/2024 tanggal 20 Maret 2024 dalam jabatan tersebut bertindak untuk dan atas nama Universitas Pembangunan Nasional "Veteran" Yogyakarta`,
-      alamat:
-        "Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283",
-      nip: "19710617 202121 2 001",
-    };
-
-    // Document settings
-    const fontSize = 24; // 12pt (docx uses half-points)
-    const lineSpacing = 276; // 1.15 line spacing
+    // Formatting Doc settings
+    const fontSize = 24; // 12pt
+    const lineSpacing = 276; // 1.15
 
     // ============================================================
-    // DOCUMENT GENERATION
+    // 3. DOCUMENT GENERATION
     // ============================================================
     const doc = new Document({
       styles: {
@@ -200,6 +179,11 @@ export const generateDocument = async (pks) => {
                 line: lineSpacing,
                 lineRule: "auto",
               },
+              alignment: AlignmentType.JUSTIFIED, // Default Justified
+            },
+            run: {
+              font: "Times New Roman", // Standar font PKS
+              size: fontSize,
             },
           },
         ],
@@ -208,12 +192,7 @@ export const generateDocument = async (pks) => {
         {
           properties: {
             page: {
-              margin: {
-                top: 4 * 567,
-                bottom: 3 * 567,
-                left: 2.54 * 567,
-                right: 2.54 * 567,
-              },
+              margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 }, // Approx 2.54cm margins
             },
           },
           headers: {
@@ -221,50 +200,68 @@ export const generateDocument = async (pks) => {
               children: [createLogoHeader(), new Paragraph({ text: "" })],
             }),
           },
-          children: [
-            new Paragraph({
-              style: "Normal",
+          footer: {
+            default: new Footer({
               children: [
-                new TextRun({
-                  text: "PERJANJIAN KERJASAMA",
-                  bold: true,
-                  size: fontSize,
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      children: ["Halaman ", PageNumber.CURRENT],
+                    }),
+                    new TextRun({
+                      children: [" dari ", PageNumber.TOTAL_PAGES],
+                    }),
+                  ],
+                  alignment: AlignmentType.RIGHT,
                 }),
+              ],
+            }),
+          },
+          children: [
+            // --- JUDUL ---
+            new Paragraph({
+              children: [
+                new TextRun({ text: "PERJANJIAN KERJA SAMA", bold: true }),
                 new TextRun({ break: 1 }),
                 new TextRun({
-                  text: " (MEMORANDUM OF AGREEMENT)",
+                  text: "( MEMORANDUM OF AGREEMENT )",
                   bold: true,
-                  size: fontSize,
                 }),
                 new TextRun({ break: 1 }),
-                new TextRun({ text: " ANTARA", bold: true, size: fontSize }),
+                new TextRun({ text: "ANTARA", bold: true }),
               ],
               alignment: AlignmentType.CENTER,
             }),
 
             new Paragraph({ text: "" }),
 
+            // --- NAMA MITRA ---
             new Paragraph({
-              style: "Normal",
+              children: [
+                new TextRun({
+                  text: toAllCapital(pihakKesatu.instansi),
+                  bold: true,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            new Paragraph({
+              children: [new TextRun({ text: "DAN", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            // --- NAMA UPN ---
+            new Paragraph({
               children: [
                 new TextRun({
                   text: `LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT`,
                   bold: true,
-                  size: fontSize,
                 }),
                 new TextRun({ break: 1 }),
                 new TextRun({
                   text: `UNIVERSITAS PEMBANGUNAN NASIONAL "VETERAN" YOGYAKARTA`,
                   bold: true,
-                  size: fontSize,
-                }),
-                new TextRun({ break: 1 }),
-                new TextRun({ text: `DAN`, bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: `${toAllCapital(pihakKedua.instansi)}`,
-                  bold: true,
-                  size: fontSize,
                 }),
               ],
               alignment: AlignmentType.CENTER,
@@ -272,112 +269,116 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
-            // NOMOR
+            // --- TENTANG ---
+            new Paragraph({
+              children: [new TextRun({ text: "TENTANG", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: toAllCapital(content.judul), bold: true }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // --- TABEL NOMOR (Sesuai Template Baru) ---
             new Table({
-              columnWidths: [3500, 500, 6000],
+              columnWidths: [2000, 500, 7500],
               width: { size: 100, type: WidthType.PERCENTAGE },
               rows: [
+                // Baris 1: Nomor Mitra
                 new TableRow({
                   children: [
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nomor",
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
-                          alignment: AlignmentType.RIGHT,
-                        }),
-                      ],
-                      width: { size: 35, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${formattedNomor}`,
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
+                          text: "NOMOR",
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: ":",
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: pihakKesatu.nomorDokumen,
+                          alignment: AlignmentType.LEFT,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
+                // Baris 2: Nomor UPN
                 new TableRow({
                   children: [
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nomor",
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
-                          alignment: AlignmentType.RIGHT,
-                        }),
-                      ],
-                      width: { size: 35, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.nomor}`,
-                              size: fontSize,
-                              bold: true,
-                            }),
-                          ],
+                          text: "NOMOR",
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: ":",
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: formattedNomorUPN,
+                          alignment: AlignmentType.LEFT,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
@@ -387,36 +388,11 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
-            // TENTANG
+            // --- KALIMAT PEMBUKA ---
             new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "TENTANG", bold: true, size: fontSize }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-            new Paragraph({
-              style: "Normal",
               children: [
                 new TextRun({
-                  text: `${toAllCapital(content.judul)}`,
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PEMBUKAAN
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `${kalimatTanggal}, yang bertanda tangan di bawah ini: `,
-                  bold: false,
-                  size: fontSize,
+                  text: `Perjanjian Kerja Sama tentang ${content.judul} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
@@ -424,262 +400,148 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
-            // PIHAK PERTAMA
+            // --- IDENTITAS PARA PIHAK (PIHAK KESATU = MITRA) ---
+            // Menggunakan Tabel tanpa border agar rapi seperti template
             new Table({
-              columnWidths: [500, 3000, 500, 6000],
+              columnWidths: [3000, 500, 6500],
               width: { size: 100, type: WidthType.PERCENTAGE },
               rows: [
+                // NAMA MITRA
                 new TableRow({
                   children: [
                     new TableCell({
                       children: [
+                        new Paragraph({ text: "Nama dan Gelar", bold: true }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "I.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
+                          text: ":",
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                     new TableCell({
                       children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nama",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
+                        new Paragraph({ text: pihakKesatu.nama, bold: true }),
                       ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.nama,
-                              bold: true,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
+                // DESKRIPSI MITRA
                 new TableRow({
                   children: [
                     new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [new TextRun({ text: "", bold: false })],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ text: "" })], // Kosong
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [new Paragraph({ text: "" })], // Kosong
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.jabatan,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
+                          text: `Selaku ${pihakKesatu.jabatan} pada ${pihakKesatu.instansi}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut PIHAK KESATU.`,
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
+
+                // SPACER ROW
                 new TableRow({
                   children: [
                     new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [new TextRun({ text: "", bold: false })],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "SK. Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.skJabatan,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      children: [],
+                      columnSpan: 3,
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
+
+                // NAMA UPN (PIHAK KEDUA)
                 new TableRow({
                   children: [
                     new TableCell({
                       children: [
+                        new Paragraph({ text: pihakKedua.nama, bold: true }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [new TextRun({ text: " ", bold: false })],
+                          text: ":",
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Alamat Kantor",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.alamat,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
+                          text: pihakKedua.deskripsi,
                           alignment: AlignmentType.JUSTIFIED,
                         }),
                       ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
                     }),
                   ],
                 }),
@@ -689,1703 +551,671 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
+            // --- DEFINISI PARA PIHAK ---
             new Paragraph({
-              style: "Normal",
               children: [
+                new TextRun({ text: "PIHAK KESATU", bold: true }),
+                new TextRun({ text: " dan " }),
+                new TextRun({ text: "PIHAK KEDUA", bold: true }),
                 new TextRun({
-                  text: "Selanjutnya yang disebut sebagai",
-                  bold: false,
-                  size: fontSize,
+                  text: " untuk selanjutnya secara bersama-sama disebut sebagai ",
                 }),
-                new TextRun({
-                  text: " PIHAK PERTAMA.",
-                  bold: true,
-                  size: fontSize,
-                }),
+                new TextRun({ text: "PARA PIHAK", bold: true }),
+                new TextRun({ text: ", dan masing-masing disebut " }),
+                new TextRun({ text: "PIHAK", bold: true }),
+                new TextRun({ text: "." }),
               ],
+              alignment: AlignmentType.JUSTIFIED,
             }),
 
             new Paragraph({ text: "" }),
 
-            // PIHAK KEDUA
-            new Table({
-              columnWidths: [500, 3000, 500, 6000],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "II.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Nama",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.nama}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Jabatan",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.jabatan}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Alamat Kantor",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.LEFT,
-                        }),
-                      ],
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: ":",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `${pihakKedua.alamat}`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 60, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-              ],
-              borders: TableBorders.NONE,
+            // --- KONSIDERANS (Latar Belakang) ---
+            new Paragraph({
+              text: "PARA PIHAK terlebih dahulu menerangkan:",
+              alignment: AlignmentType.JUSTIFIED,
             }),
 
-            new Paragraph({ text: "" }),
-
+            // Poin 1 (Mitra)
             new Paragraph({
-              style: "Normal",
               children: [
                 new TextRun({
-                  text: "Selanjutnya yang disebut sebagai",
-                  bold: false,
-                  size: fontSize,
+                  text: `bahwa PIHAK KESATU adalah ${pihakKesatu.instansi};`,
                 }),
+              ],
+              bullet: { level: 0 },
+            }),
+
+            // Poin 2 (UPN - Statis sesuai Template)
+            new Paragraph({
+              children: [
                 new TextRun({
-                  text: " PIHAK KEDUA.",
-                  bold: true,
-                  size: fontSize,
+                  text: "bahwa PIHAK KEDUA adalah salah satu unsur pelaksana akademik di bidang penelitian dan pengabdian kepada masyarakat yang berada di bawah dan bertanggung jawab kepada Rektor berdasarkan Peraturan Menteri Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia Nomor 20 Tahun 2024 tentang Organisasi dan Tata Kerja Universitas Pembangunan Nasional “Veteran” Yogyakarta;",
+                }),
+              ],
+              bullet: { level: 0 },
+            }),
+
+            new Paragraph({ text: "dan" }),
+
+            // --- KESEPAKATAN ---
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Berdasarkan hal-hal tersebut di atas, PARA PIHAK sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${content.judul} (kegiatan atau program yang akan dilaksanakan).`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
             }),
 
             new Paragraph({ text: "" }),
+            new Paragraph({ text: "" }), // Spacer sebelum Pasal 1
+
             // ============================================================
-            // >>> GANTI BAGIAN INI (LOGIKA MoU) <<<
+            // DISINI MULAI PASAL 1 dst... (Nanti kita lanjut part berikutnya)
             // ============================================================
-            ...(pks.mou?.hasMoU
-              ? [
-                  // --- OPSI A: JIKA ADA MoU ---
+
+            // ============================================================
+            // PASAL 1 - TUJUAN
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 1", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "TUJUAN", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Tujuan dilakukan perjanjian ini adalah sebagai landasan bagi PARA PIHAK dalam melakukan kegiatan dukungan PIHAK KEDUA dalam rangka penyelenggaraan Tri Dharma Perguruan Tinggi melalui kerja sama ${content.judul}.`,
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // PASAL 2 - RUANG LINGKUP
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 2", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "RUANG LINGKUP", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              text: "Ruang lingkup Perjanjian ini meliputi:",
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Poin 1: Logika 3 Pilihan (Penelitian, Pengabdian, atau Keduanya)
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text:
+                    content.bentukKerjaSama.includes("Penelitian") &&
+                    content.bentukKerjaSama.includes("Pengabdian Masyarakat")
+                      ? "1.\tKegiatan Penelitian dan Pengabdian bagi Masyarakat;"
+                      : content.bentukKerjaSama.includes("Penelitian")
+                        ? "1.\tKegiatan Penelitian;"
+                        : "1.\tKegiatan Pengabdian bagi Masyarakat;",
+                }),
+              ],
+              // Menggunakan hanging indent agar angka rapi
+              indent: { left: 720, hanging: 360 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Poin 2: Statis
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "2.\tPemanfaatan sumberdaya manusia serta fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                }),
+              ],
+              indent: { left: 720, hanging: 360 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // PASAL 3 - PELAKSANAAN
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 3", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "PELAKSANAAN", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            // Ayat 1
+            new Paragraph({
+              text: "(1)\tPARA PIHAK sepakat dalam pelaksanaan kegiatan akan mematuhi seluruh aspek perundang-undangan yang berlaku dan menunjuk wakil-wakilnya yang memiliki kompetensi dan disiplin ilmu yang terkait untuk melaksanakan Perjanjian ini.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 2
+            new Paragraph({
+              text: "(2)\tDalam melaksanakan ruang lingkup sebagaimana dimaksud dalam Pasal 2 Perjanjian ini, penanggungjawab kegiatan sebagaimana disebut pada ayat (1) berpedoman kepada Kerangka Acuan Kerja (KAK) sebagai bagian yang tidak terpisahkan Perjanjian ini.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 3
+            new Paragraph({
+              text: "(3)\tKerangka Acuan Kerja sebagaimana dimaksud pada ayat (2) berisi pedoman kerja yang mencakup antara lain tujuan, sasaran, output, tahapan dan jadwal pelaksanaan, personil yang terlibat, pembiayaan, serta hal-hal lain yang dianggap perlu.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 4
+            new Paragraph({
+              text: "(4)\tApabila salah satu dari PARA PIHAK berkehendak melibatkan pihak lain dalam pelaksanaan kegiatan perjanjian ini maka dibutuhkan persetujuan tertulis dari PARA PIHAK.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // POIN 5 DIHAPUS SESUAI INSTRUKSI
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // PASAL 4 - PEMBIAYAAN, HAK DAN KEWAJIBAN
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 4", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "PEMBIAYAAN, HAK DAN KEWAJIBAN",
+                  bold: true,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+            // Ayat 1
+            new Paragraph({
+              text: "(1)\tBiaya untuk pelaksanaan kerja sama akan diatur dalam Rancangan Pelaksanaan Kegiatan Kerjasama (Implementation Arrangement/IA) yang menjadi bagian tidak terpisahkan dari Perjanjian Kerja sama ini;",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 2
+            new Paragraph({
+              text: "(2)\tSegala biaya yang timbul sebagai akibat dari pelaksanaan Perjanjian ini menjadi beban PARA PIHAK sesuai dengan proporsi tanggung jawab masing-masing;",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 3
+            new Paragraph({
+              text: "(3)\tSumber biaya selain sebagaimana dimaksud pada ayat (2), dapat berasal dari pihak lain yang sifatnya sah dan tidak mengikat sesuai peraturan perundang-undangan.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // PASAL 5 - TUGAS DAN TANGGUNG JAWAB
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 5", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: "TUGAS DAN TANGGUNGJAWAB", bold: true }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            // a) PIHAK KESATU (MITRA)
+            new Paragraph({
+              text: "a)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            new Paragraph({
+              text: "a)\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
+              indent: { left: 1440, hanging: 450 }, // Indent lebih dalam
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text:
+                    content.bentukKerjaSama.includes("Penelitian") &&
+                    content.bentukKerjaSama.includes("Pengabdian Masyarakat")
+                      ? "b)\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                      : content.bentukKerjaSama.includes("Penelitian")
+                        ? "b)\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                        : "b)\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                }),
+              ],
+              indent: { left: 1440, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            // b) PIHAK KEDUA (UPN)
+            new Paragraph({
+              text: "b)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            new Paragraph({
+              text: "a)\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
+              indent: { left: 1440, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text:
+                    content.bentukKerjaSama.includes("Penelitian") &&
+                    content.bentukKerjaSama.includes("Pengabdian Masyarakat")
+                      ? "b)\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
+                      : content.bentukKerjaSama.includes("Penelitian")
+                        ? "b)\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
+                        : "b)\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
+                }),
+              ],
+              indent: { left: 1440, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            // c) BERSAMA
+            new Paragraph({
+              text: "(3)\tPARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab menyusun laporan pelaksanaan kegiatan.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // PASAL 6 - JANGKA WAKTU
+            // ============================================================
+            new Paragraph({
+              children: [new TextRun({ text: "PASAL 6", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "JANGKA WAKTU", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            // Ayat 1: Durasi
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `(1)\tPerjanjian ini berlaku untuk jangka waktu 1 (satu) tahun, terhitung sejak tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} sampai dengan tanggal ${content.tanggalKadaluarsa ? new Date(content.tanggalKadaluarsa).toLocaleDateString("id-ID") : "...................."} dan dapat diperpanjang berdasarkan kesepakatan PARA PIHAK;`,
+                }),
+              ],
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+            // Ayat 2: Pengakhiran Dini
+            new Paragraph({
+              text: "(2)\tPerjanjian ini dapat diakhiri sebelum masa berlakunya berakhir dengan ketentuan pihak yang ingin mengakhiri Perjanjian ini harus memberitahukan secara tertulis kepada pihak lainnya paling lambat 3 (tiga) bulan sebelumnya.",
+              indent: { left: 720, hanging: 450 },
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // ============================================================
+            // BAGIAN DINAMIS: PASAL 7 S/D PENUTUP
+            // Menggunakan fungsi wrapper (IIFE) agar penomoran pasal bisa otomatis
+            // ============================================================
+            ...(() => {
+              const dynamicSections = [];
+              let pCounter = 7; // Mulai hitungan dari Pasal 7
+
+              // ------------------------------------------------------------
+              // PASAL 7 - PENGHENTIAN PERJANJIAN
+              // ------------------------------------------------------------
+              // Simpan nomor pasal ini jika perlu referensi silang (opsional)
+              // const nomorPasalPenghentian = pCounter;
+
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "PENGHENTIAN PERJANJIAN", bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tAtas permohonan salah satu pihak sebagai pemohon (PIHAK KESATU atau PIHAK KEDUA) dan berdasarkan persetujuan kedua belah pihak, perjanjian ini dapat dibatalkan sebelum berakhirnya jangka waktu perjanjian sebagaimana tersebut pada Pasal 6 perjanjian ini.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(2)\tPermohonan pembatalan perjanjian sebagaimana dimaksud pada Ayat (1) pasal ini harus disampaikan oleh pemohon kepada pihak lainnya secara tertulis disertai alasan-alasan yang mendasarinya paling lambat 30 (tiga puluh) hari sebelum tanggal pembatalan perjanjian.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+              );
+              pCounter++; // Naik ke 8
+
+              // ------------------------------------------------------------
+              // PASAL 8 (OPSIONAL) - HAK KEKAYAAN INTELEKTUAL
+              // ------------------------------------------------------------
+              if (content.hasHakCipta) {
+                dynamicSections.push(
                   new Paragraph({
-                    style: "Normal",
+                    children: [
+                      new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                    ],
+                    alignment: AlignmentType.CENTER,
+                  }),
+                  new Paragraph({
                     children: [
                       new TextRun({
-                        text: "PIHAK PERTAMA dan PIHAK KEDUA selanjutnya secara sendiri–sendiri disebut “PIHAK” dan secara bersama – sama disebut “PARA PIHAK”.",
-                        size: fontSize,
+                        text: "HAK KEKAYAAN INTELEKTUAL",
+                        bold: true,
                       }),
                     ],
+                    alignment: AlignmentType.CENTER,
+                  }),
+                  new Paragraph({
+                    text: "(1)\tSetiap HKI yang dibawa oleh para pihak (HKI bawaan) dalam melaksanakan kegiatan menurut perjanjian ini menjadi milik PIHAK KEDUA.",
+                    indent: { left: 720, hanging: 450 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  // Ayat 2: Dinamis sesuai jenis kegiatan
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text:
+                          content.bentukKerjaSama.includes("Penelitian") &&
+                          content.bentukKerjaSama.includes(
+                            "Pengabdian Masyarakat",
+                          )
+                            ? "(2)\tSetiap hasil Kegiatan Penelitian dan Pengabdian bagi Masyarakat, data dan informasi yang dihasilkan dari kegiatan menurut perjanjian ini dimiliki secara bersama-sama oleh kedua belah pihak."
+                            : content.bentukKerjaSama.includes("Penelitian")
+                              ? "(2)\tSetiap hasil Kegiatan Penelitian, data dan informasi yang dihasilkan dari kegiatan menurut perjanjian ini dimiliki secara bersama-sama oleh kedua belah pihak."
+                              : "(2)\tSetiap hasil Kegiatan Pengabdian bagi Masyarakat, data dan informasi yang dihasilkan dari kegiatan menurut perjanjian ini dimiliki secara bersama-sama oleh kedua belah pihak.",
+                      }),
+                    ],
+                    indent: { left: 720, hanging: 450 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({
+                    text: "Setiap pemanfaatan Hak Kekayaan Intelektual tersebut, baik itu untuk kepentingan komersial maupun nonkomersial, akan diatur secara tersendiri.",
+                    indent: { left: 720 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({
+                    text: "(3)\tSetiap publikasi data dan informasi hasil kegiatan menurut perjanjian ini harus dilaksanakan bersama-sama atau dengan mekanisme lain yang diatur tersendiri yang merupakan bagian tidak terpisahkan dari perjanjian ini.",
+                    indent: { left: 720, hanging: 450 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({
+                    text: "Publikasi yang dilakukan oleh salah satu pihak wajib mencantumkan pihak lainnya sebagai ungkapan penghargaan.",
+                    indent: { left: 720 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({
+                    text: "(4)\tJika salah satu pihak bermaksud mengungkapkan data dan/atau informasi rahasia yang dihasilkan dari kegiatan menurut perjanjian ini kepada pihak ketiga atau bermaksud melakukan kerjasama dengan pihak ketiga, maka pihak tersebut harus terlebih dahulu mendapatkan persetujuan pihak lainnya.",
+                    indent: { left: 720, hanging: 450 },
+                    alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  new Paragraph({
+                    text: "(5)\tPenghentian pelaksanaan kegiatan menurut perjanjian ini tidak serta merta menghentikan segala hak dan/atau kewajiban para pihak yang diatur dalam pasal ini.",
+                    indent: { left: 720, hanging: 450 },
                     alignment: AlignmentType.JUSTIFIED,
                   }),
                   new Paragraph({ text: "" }),
-                  // Poin 1
-                  new Paragraph({
-                    style: "Normal",
-                    children: [
-                      new TextRun({
-                        text: "1.\tBahwa PARA PIHAK bermaksud untuk memanfaatkan ilmu pengetahuan dan teknologi dalam penyelenggaraan Penelitian dan Pengabdian Masyarakat;",
-                        size: fontSize,
-                      }),
-                    ],
-                    alignment: AlignmentType.JUSTIFIED,
-                    indent: { left: 720, hanging: 360 }, // Hanging indent agar rapi
-                  }),
-                  // Poin 2 (Detail MoU)
-                  new Paragraph({
-                    style: "Normal",
-                    children: [
-                      new TextRun({
-                        text: "2.\tBahwa Perjanjian Kerja Sama ini merupakan tindak lanjut Nota Kesepahaman Bersama antara ",
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: `${toCapitalizeFirst(pks.pihakKedua.instansi)}`, // Nama Mitra
-                        bold: false,
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: " dan Universitas Pembangunan Nasional Veteran Yogyakarta Nomor: ",
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: `${pks.mou.nomorMitra || ".........."}`,
-                        bold: false,
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: " dan Nomor ",
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: `${pks.mou.nomorUpn || ".........."}`,
-                        bold: false,
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: " tentang ",
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: `${toCapitalizeFirst(pks.mou.judul) || ".........."}`,
-                        bold: false,
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: " tanggal ",
-                        size: fontSize,
-                      }),
-                      new TextRun({
-                        text: `${
-                          pks.mou.tanggalMulai
-                            ? new Date(pks.mou.tanggalMulai).toLocaleDateString(
-                                "id-ID",
-                                {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                },
-                              )
-                            : ".........."
-                        }.`,
-                        size: fontSize,
-                      }),
-                    ],
-                    alignment: AlignmentType.JUSTIFIED,
-                    indent: { left: 720, hanging: 360 },
-                  }),
-                  new Paragraph({ text: "" }),
-                  // Kalimat Kesepakatan
-                  new Paragraph({
-                    style: "Normal",
-                    children: [
-                      new TextRun({
-                        text: "PARA PIHAK dengan ini sepakat secara bersama-sama dengan kedudukan dan kewenangan masing-masing untuk mengadakan kesepakatan bersama yang selanjutnya disebut “Perjanjian Kerja Sama” dengan berpedoman kepada ketentuan-ketentuan yang diuraikan sebagai berikut:",
-                        size: fontSize,
-                      }),
-                    ],
-                    alignment: AlignmentType.JUSTIFIED,
-                  }),
-                ]
-              : [
-                  // --- OPSI B: TIDAK ADA MoU (DEFAULT) ---
-                  new Paragraph({
-                    style: "Normal",
-                    children: [
-                      new TextRun({
-                        text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut: ",
-                        bold: false,
-                        size: fontSize,
-                      }),
-                    ],
-                    alignment: AlignmentType.JUSTIFIED,
-                  }),
-                ]),
+                );
+                pCounter++; // Counter naik jika pasal ini ada
+              }
+
+              // ------------------------------------------------------------
+              // PASAL FORCE MAJEURE (Nomor Dinamis)
+              // ------------------------------------------------------------
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "FORCE MAJEURE", bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tMasing-masing pihak dibebaskan dari tanggung jawab atas keterlambatan atau kegagalan dalam memenuhi kewajiban yang tercantum dalam Perjanjian ini, yang disebabkan atau diakibatkan oleh kejadian di luar kekuasaan masing-masing pihak yang digolongkan sebagai Force Majeure.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(2)\tPeristiwa yang dapat digolongkan Force Majeure adalah: adanya bencana alam seperti gempa bumi, taufan, banjir atau hujan terus menerus, wabah penyakit, adanya perang, peledakan, sabotase, revolusi, pemberontakan, huru hara, adanya tindakan pemerintahan dalam bidang ekonomi dan moneter yang secara nyata berpengaruh terhadap pelaksanaan Perjanjian ini.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(3)\tApabila terjadi Force Majeure maka pihak yang lebih dahulu mengetahui wajib memberitahukan kepada pihak lainnya selambat-lambatnya dalam waktu 14 (empat belas hari) setelah terjadinya Force Majeure.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(4)\tKeadaan Kahar/Force Majeure sebagaimana dimaksud Ayat (2) perjanjian ini tidak menghapuskan atau mengakhiri perjanjian ini.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "Setelah keadaan Kahar/Force Majeure berakhir dan kondisinya masih memungkinkan kegiatan dapat dilaksanakan oleh PIHAK PERTAMA maka PARA PIHAK akan melanjutkan pelaksanaan perjanjian ini sesuai dengan ketentuan-ketentuan yang diatur dalam perjanjian ini.",
+                  indent: { left: 720 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+              );
+              pCounter++;
+
+              // ------------------------------------------------------------
+              // PASAL PENYELESAIAN PERSELISIHAN (Nomor Dinamis)
+              // ------------------------------------------------------------
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "PENYELESAIAN PERSELISIHAN",
+                      bold: true,
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tApabila dalam pelaksanaan perjanjian ini diantara kedua belah pihak terdapat perselisihan atau ketidaksesuaian pendapat, akan diselesaikan dengan musyawarah untuk mencapai mufakat.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+              );
+              pCounter++;
+
+              // ------------------------------------------------------------
+              // PASAL PEMBATALAN PERJANJIAN (Nomor Dinamis)
+              // ------------------------------------------------------------
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "PEMBATALAN PERJANJIAN", bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tAtas permohonan salah satu pihak sebagai pemohon (PIHAK KESATU atau PIHAK KEDUA) dan berdasarkan persetujuan kedua belah pihak, perjanjian ini dapat dibatalkan sebelum berakhirnya jangka waktu perjanjian sebagaimana tersebut pada Pasal 7 perjanjian ini.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(2)\tPermohonan pembatalan perjanjian sebagaimana dimaksud pada Ayat (1) pasal ini harus disampaikan oleh pemohon kepada pihak lainnya secara tertulis disertai alasan-alasan yang mendasarinya paling lambat 30 (tiga puluh) hari sebelum tanggal pembatalan perjanjian.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+              );
+              pCounter++;
+
+              // ------------------------------------------------------------
+              // PASAL KORESPONDENSI (Nomor Dinamis)
+              // ------------------------------------------------------------
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "KORESPONDENSI", bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tKoordinasi, komunikasi, dokumen, dan/atau pemberitahuan yang berhubungan dengan Perjanjian Kerjasama ini disampaikan secara langsung dan/atau melalui pos tercatat serta cara-cara lain yang memungkinkan.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(2)\tAlamat PARA PIHAK yang akan dipakai untuk komunikasi guna keperluan sebagaimana dimaksud pada ayat (1) adalah sebagai berikut:",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+
+                // Detail Kontak PIHAK KESATU (MITRA) - Data Dinamis
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "PIHAK KESATU:",
+                      bold: true,
+                      underline: true,
+                    }),
+                  ],
+                  indent: { left: 1440 },
+                  spacing: { before: 100 },
+                }),
+                new Paragraph({
+                  text: `Nama\t: ${pihakKesatu.nama}`,
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: `Alamat\t: ${pihakKesatu.alamat}`,
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: `Email\t: ${data.properties.email || "-"}`,
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: `Telepon\t: ${data.properties.telepon || "-"}`,
+                  indent: { left: 1440 },
+                }),
+
+                // Detail Kontak PIHAK KEDUA (UPN) - Statis
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "PIHAK KEDUA:",
+                      bold: true,
+                      underline: true,
+                    }),
+                  ],
+                  indent: { left: 1440 },
+                  spacing: { before: 100 },
+                }),
+                new Paragraph({
+                  text: "Koordinator Tata Usaha Lembaga Penelitian dan Pengabdian Masyarakat Universitas Pembangunan Nasional Veteran Yogyakarta",
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: "Alamat\t: Jalan Pajajaran 104, Sleman, Daerah Istimewa Yogyakarta, 55283",
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: "Email\t: lppm@upnyk.ac.id",
+                  indent: { left: 1440 },
+                }),
+                new Paragraph({
+                  text: "Telepon\t: (0274) 486773",
+                  indent: { left: 1440 },
+                }),
+
+                new Paragraph({
+                  text: "(3)\tBila terjadi perubahan terhadap alamat dari salah satu pihak, pihak yang berubah alamatnya wajib memberitahukan kepada pihak lainnya dalam waktu 14 (empat belas) hari setelah perubahan dilakukan.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                  spacing: { before: 200 },
+                }),
+                new Paragraph({ text: "" }),
+              );
+              pCounter++;
+
+              // ------------------------------------------------------------
+              // PASAL PENUTUP (Nomor Dinamis)
+              // ------------------------------------------------------------
+              dynamicSections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `PASAL ${pCounter}`, bold: true }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  children: [new TextRun({ text: "PENUTUP", bold: true })],
+                  alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                  text: "(1)\tPerubahan terhadap Perjanjian Kerja Sama ini akan ditetapkan dalam addendum yang disepakati oleh PARA PIHAK dan merupakan bagian yang tidak terpisahkan dari Perjanjian Kerja Sama ini.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({
+                  text: "(2)\tPerjanjian Kerja Sama ini dibuat dan ditandatangani oleh PARA PIHAK pada hari dan tanggal tersebut pada bagian awal Kesepakatan Bersama ini, dibuat dalam rangkap 2 (dua) yang bermeterai cukup dan mempunyai kekuatan hukum yang sama, untuk masing-masing pihak dan dipergunakan sebagaimana mestinya.",
+                  indent: { left: 720, hanging: 450 },
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+                new Paragraph({
+                  text: "Demikian Perjanjian Kerja Sama ini dibuat oleh PARA PIHAK dengan itikad baik, untuk dapat dipatuhi dan dilaksanakan oleh PARA PIHAK.",
+                  alignment: AlignmentType.JUSTIFIED,
+                }),
+                new Paragraph({ text: "" }),
+                new Paragraph({ text: "" }),
+              );
+
+              return dynamicSections;
+            })(),
+
             // ============================================================
-            // >>> BATAS AKHIR GANTI <<<
+            // TANDA TANGAN (KIRI: MITRA, KANAN: UPN)
             // ============================================================
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: "PIHAK PERTAMA dan PIHAK KEDUA secara sendiri-sendiri disebut PIHAK dan secara bersama-sama disebut PARA PIHAK. PARA PIHAK menyatakan sepakat dan setuju mengadakan kerjasama untuk saling menunjang pelaksanaan tugas masing-masing dengan ketentuan sebagai berikut: ",
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.JUSTIFIED,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 1
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 1", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "TUJUAN KERJASAMA",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Dengan tetap mengindahkan ketentuan dan peraturan perundang-undangan yang berlaku bagi PARA PIHAK, Perjanjian Kerjasama ini dibuat dalam rangka menunjang Pelaksanaan Tri Darma Perguruan Tinggi serta membina hubungan kelembagaan antara PARA PIHAK untuk bekerjasama dan saling membantu dalam pelaksanaan Pengabdian Masyarakat dengan judul ${toCapitalizeFirst(
-                    content.judul,
-                  )}, yang selanjutnya akan disebut program kerjasama.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.JUSTIFIED,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 2
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 2", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "RUANG LINGKUP KERJASAMA",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 500, 9000],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Ruang lingkup perjanjian Kerjasama ini meliputi:",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      columnSpan: 3,
-                      width: { size: 100, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "a.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Menunjang pelaksanaan penelitian.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "b.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Kegiatan pengabdian dalam rangka ${toCapitalizeFirst(
-                                content.judul,
-                              )}.`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "c.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Kegiatan-kegiatan lain yang dianggap perlu.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-              ],
-              borders: TableBorders.NONE,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 3
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 3", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PELAKSANAAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Pelaksanaan kerjasama secara rinci dalam bidang-bidang tertentu akan disusun dan dituangkan dalam naskah Perjanjian kerjasama yang disetujui oleh PARA PIHAK dan merupakan bagian yang tidak terpisahkan dari naskah perjanjian kerjasama ini.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.JUSTIFIED,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 4
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 4", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PEMBIAYAAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 9500],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "1.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Kegiatan-kegiatan yang akan dilaksanakan berdasarkan Perjanjian Kerjasama ini akan dibiayai dari dana yang relevan dari PARA PIHAK.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "2.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Pembiayaan untuk kegiatan yang disepakati tersebut akan diatur dalam Perjanjian Kerjasama tersendiri.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-              ],
-              borders: TableBorders.NONE,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 5
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 5", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "TUGAS DAN TANGGUNGJAWAB",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 500, 9000],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                // PIHAK KESATU Header
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "1.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "PIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      columnSpan: 2,
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KESATU - Item a
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "a)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Mengolah data dan informasi yang diperoleh dari PIHAK KEDUA;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KESATU - Item b
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "b)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Melaksanakan penyelenggaraan pelatihan, penyuluhan, dan pendampingan masyarakat desa dalam rangka pengembangan sumberdaya manusia;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KESATU - Item c
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "c)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Melaksanakan Penelitian terkait ${toCapitalizeFirst(
-                                content.judul,
-                              )};`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KESATU - Item d
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "d)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Melaksanakan kegiatan pemberdayaan masyarakat.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-
-                // Empty row for spacing
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                        }),
-                      ],
-                      columnSpan: 3,
-                    }),
-                  ],
-                }),
-
-                // PIHAK KEDUA Header
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "2.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "PIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      columnSpan: 2,
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KEDUA - Item a
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "a)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Mengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KEDUA - Item b
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "b)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Memfasilitasi penyelenggaraan penelitian, pelatihan, penyuluhan, dan pendampingan masyarakat desa dalam rangka pengembangan sumberdaya manusia;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PIHAK KEDUA - Item c
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "c)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Memfasilitasi kegiatan pemberdayaan masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-
-                // Empty row for spacing
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                        }),
-                      ],
-                      columnSpan: 3,
-                    }),
-                  ],
-                }),
-
-                // PARA PIHAK Header
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "3.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "PARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab:",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      columnSpan: 2,
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PARA PIHAK - Item a
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "a)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Melakukan pendampingan Masyarakat Desa dalam rangka pengembangan sumberdaya manusia;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PARA PIHAK - Item b
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "b)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Penelitian terkait ${toCapitalizeFirst(
-                                content.judul,
-                              )};`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PARA PIHAK - Item c
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "c)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Melaksanakan kegiatan pemberdayaan masyarakat;",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // PARA PIHAK - Item d
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: " ",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "d)",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Menyusun laporan pelaksanaan kegiatan.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 90, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-              ],
-              borders: TableBorders.NONE,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 6
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 6", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "JANGKA WAKTU",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Perjanjian Kerjasama ini berlaku untuk jangka waktu (......)*`,
-                  bold: false,
-                  size: fontSize,
-                }),
-                new TextRun({
-                  text: `harap diisi`,
-                  bold: false,
-                  italics: true, // ← Kata "harap diisi" menjadi italic
-                  size: fontSize,
-                }),
-                new TextRun({
-                  text: ` terhitung sejak tanggal penandatanganan dan apabila masa berlakunya sudah berakhir dapat diperpanjang atau diakhiri atas persetujuan PARA PIHAK paling lambat 30 (tiga puluh) hari kalender sebelum masa berlaku Perjanjian Kerjasama ini berakhir.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.JUSTIFIED,
-            }),
-            new Paragraph({ text: "" }),
-
-            // PASAL 7
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 7", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({
-                  text: "PENYELESAIAN PERSELISIHAN",
-                  bold: true,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({
-                  text: `Perselisihan timbul sebagai akibat dari pelaksanaan kerjasama ini akan diselesaikan oleh PARA PIHAK secara musyawarah dan mufakat.`,
-                  bold: false,
-                  size: fontSize,
-                }),
-              ],
-              alignment: AlignmentType.JUSTIFIED,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PASAL 8
-            new Paragraph({
-              style: "Normal",
-              children: [
-                new TextRun({ text: "Pasal 8", bold: true, size: fontSize }),
-                new TextRun({ break: 1 }),
-                new TextRun({ text: "PENUTUPAN", bold: true, size: fontSize }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-
-            new Paragraph({ text: "" }),
-
-            new Table({
-              columnWidths: [500, 9500],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "1.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: `Hal-hal yang bersifat melengkapi dan belum diatur dalam Perjanjian Kerjasama ini akan ditentukan kemudian atas dasar persetujuan PARA PIHAK dan akan dibuat "addendum" tersendiri yang merupakan bagian yang tidak terpisahkan dari Perjanjian Kerjasama ini.`,
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "2.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 5, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: "Perjanjian Kerjasama ini dibuat dalam rangkap 2 (dua) asli, masing-masing bermaterai cukup dan keduanya mempunyai kekuatan hukum yang sama, ditanda tangani dan dibubuhi cap lembaga masing-masing serta diberikan kepada PARA PIHAK pada saat perjanjian ditanda tangani.",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                          ],
-                          alignment: AlignmentType.JUSTIFIED,
-                        }),
-                      ],
-                      width: { size: 95, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-              ],
-              borders: TableBorders.NONE,
-            }),
-
-            new Paragraph({ text: "" }),
-            new Paragraph({ text: "" }),
-
-            // TANDA TANGAN
             new Table({
               columnWidths: [5000, 5000],
               width: { size: 100, type: WidthType.PERCENTAGE },
@@ -2395,59 +1225,17 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
-                            new TextRun({
-                              text: "PIHAK PERTAMA,",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
+                            new TextRun({ text: "PIHAK KESATU", bold: true }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
-                      ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
                             new TextRun({
-                              text: "PIHAK KEDUA",
-                              bold: false,
-                              size: fontSize,
-                            }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                            new TextRun({ break: 1 }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({
-                          style: "Normal",
-                          children: [
-                            new TextRun({
-                              text: pihakPertama.nama,
-                              underline: true,
+                              text: toAllCapital(pihakKesatu.instansi),
                               bold: true,
-                              size: fontSize,
+                              size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
@@ -2458,13 +1246,17 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
+                          children: [
+                            new TextRun({ text: "PIHAK KEDUA", bold: true }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
                           children: [
                             new TextRun({
-                              text: `${pihakKedua.nama}`,
-                              underline: true,
+                              text: "Kepala LPPM UPN Veteran Yogyakarta",
                               bold: true,
-                              size: fontSize,
+                              size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
@@ -2474,46 +1266,76 @@ export const generateDocument = async (pks) => {
                     }),
                   ],
                 }),
+                // SPACER TANDA TANGAN
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({ text: "", spacing: { before: 1500 } }),
+                      ],
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({ text: "", spacing: { before: 1500 } }),
+                      ],
+                    }),
+                  ],
+                }),
+                // NAMA PENANDATANGAN
                 new TableRow({
                   children: [
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
                             new TextRun({
-                              text: `NIP ${pihakPertama.nip}`,
+                              text: pihakKesatu.nama,
                               bold: true,
-                              size: fontSize,
+                              underline: true,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: pihakKesatu.jabatan,
+                              size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                     new TableCell({
                       children: [
                         new Paragraph({
-                          style: "Normal",
                           children: [
                             new TextRun({
-                              text: `${toCapitalizeFirst(pihakKedua.jabatan)}`,
+                              text: pihakKedua.nama,
                               bold: true,
-                              size: fontSize,
+                              underline: true,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: "NIP " + pihakKedua.nip,
+                              size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),
               ],
               borders: TableBorders.NONE,
             }),
-          ],
+          ], // END CHILDREN
         },
       ],
     });
@@ -2524,7 +1346,7 @@ export const generateDocument = async (pks) => {
     const buffer = await Packer.toBuffer(doc);
     return buffer;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error generating document:", error);
     throw new Error("Gagal membuat dokumen: " + error.message);
   }
 };

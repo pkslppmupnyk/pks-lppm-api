@@ -13,6 +13,7 @@ import {
   Header,
   Footer,
   PageNumber,
+  TabStopType, // [REVISI] Import TabStopType untuk kerapian tabulasi
 } from "docx";
 import imageSize from "image-size";
 import terbilang from "terbilang";
@@ -159,6 +160,7 @@ export const generateDocument = async (pks) => {
     // Formatting Doc settings
     const fontSize = 24; // 12pt
     const lineSpacing = 276; // 1.15
+    const tabStopIndent = 3000; // [REVISI] Posisi Tab untuk titik dua agar sejajar
 
     // ============================================================
     // 3. DOCUMENT GENERATION
@@ -391,8 +393,9 @@ export const generateDocument = async (pks) => {
             // --- KALIMAT PEMBUKA ---
             new Paragraph({
               children: [
+                // [REVISI] Judul kegiatan di-uppercase agar konsisten
                 new TextRun({
-                  text: `Perjanjian Kerja Sama tentang ${content.judul} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
+                  text: `Perjanjian Kerja Sama tentang ${toAllCapital(content.judul)} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
@@ -411,7 +414,8 @@ export const generateDocument = async (pks) => {
                   children: [
                     new TableCell({
                       children: [
-                        new Paragraph({ text: "Nama dan Gelar", bold: true }),
+                        // [REVISI] Mengubah "Nama dan Gelar" jadi "Nama dan gelar"
+                        new Paragraph({ text: "Nama dan gelar", bold: true }),
                       ],
                       borders: {
                         top: { style: "none" },
@@ -717,7 +721,6 @@ export const generateDocument = async (pks) => {
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
-            // POIN 5 DIHAPUS SESUAI INSTRUKSI
 
             new Paragraph({ text: "" }),
 
@@ -772,14 +775,15 @@ export const generateDocument = async (pks) => {
               alignment: AlignmentType.CENTER,
             }),
 
-            // a) PIHAK KESATU (MITRA)
+            // [REVISI] Memperbaiki penomoran dari a), b) ke (1), (2) agar konsisten dengan (3)
+            // (1) PIHAK KESATU (MITRA)
             new Paragraph({
-              text: "a)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
+              text: "(1)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
             new Paragraph({
-              text: "a)\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
+              text: "a.\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
               indent: { left: 1440, hanging: 450 }, // Indent lebih dalam
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -789,24 +793,24 @@ export const generateDocument = async (pks) => {
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b)\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                      ? "b.\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b)\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
-                        : "b)\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                        ? "b.\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                        : "b.\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
                 }),
               ],
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // b) PIHAK KEDUA (UPN)
+            // (2) PIHAK KEDUA (UPN)
             new Paragraph({
-              text: "b)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
+              text: "(2)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
             new Paragraph({
-              text: "a)\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
+              text: "a.\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -816,17 +820,17 @@ export const generateDocument = async (pks) => {
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b)\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
+                      ? "b.\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b)\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
-                        : "b)\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
+                        ? "b.\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
+                        : "b.\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
                 }),
               ],
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // c) BERSAMA
+            // (3) BERSAMA
             new Paragraph({
               text: "(3)\tPARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab menyusun laporan pelaksanaan kegiatan.",
               indent: { left: 720, hanging: 450 },
@@ -876,9 +880,6 @@ export const generateDocument = async (pks) => {
               // ------------------------------------------------------------
               // PASAL 7 - PENGHENTIAN PERJANJIAN
               // ------------------------------------------------------------
-              // Simpan nomor pasal ini jika perlu referensi silang (opsional)
-              // const nomorPasalPenghentian = pCounter;
-
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -1121,21 +1122,34 @@ export const generateDocument = async (pks) => {
                   indent: { left: 1440 },
                   spacing: { before: 100 },
                 }),
+                // [REVISI] Menambahkan TabStop untuk merapikan titik dua
                 new Paragraph({
                   text: `Nama\t: ${pihakKesatu.nama}`,
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
                 new Paragraph({
                   text: `Alamat\t: ${pihakKesatu.alamat}`,
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
                 new Paragraph({
                   text: `Email\t: ${data.properties.email || "-"}`,
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
                 new Paragraph({
                   text: `Telepon\t: ${data.properties.telepon || "-"}`,
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
 
                 // Detail Kontak PIHAK KEDUA (UPN) - Statis
@@ -1154,17 +1168,27 @@ export const generateDocument = async (pks) => {
                   text: "Koordinator Tata Usaha Lembaga Penelitian dan Pengabdian Masyarakat Universitas Pembangunan Nasional Veteran Yogyakarta",
                   indent: { left: 1440 },
                 }),
+                // [REVISI] Menambahkan TabStop pada UPN juga
                 new Paragraph({
                   text: "Alamat\t: Jalan Pajajaran 104, Sleman, Daerah Istimewa Yogyakarta, 55283",
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
                 new Paragraph({
                   text: "Email\t: lppm@upnyk.ac.id",
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
                 new Paragraph({
                   text: "Telepon\t: (0274) 486773",
                   indent: { left: 1440 },
+                  tabStops: [
+                    { type: TabStopType.LEFT, position: tabStopIndent },
+                  ],
                 }),
 
                 new Paragraph({

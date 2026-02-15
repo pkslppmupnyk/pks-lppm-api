@@ -43,6 +43,10 @@ const pksSchema = new mongoose.Schema(
           "Jenis pengabdian wajib diisi jika bentuk kerja sama adalah Pengabdian Masyarakat",
         ],
       },
+      hasHakCipta: {
+        type: Boolean,
+        default: false,
+      },
       tanggal: {
         type: Date,
         required: [true, "Tanggal is required"],

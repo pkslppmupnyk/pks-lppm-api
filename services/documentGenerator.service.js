@@ -537,8 +537,20 @@ export const generateDocument = async (pks) => {
             }),
             new Paragraph({
               children: [
+                // Bagian 1: Teks normal sebelum "PARA PIHAK"
                 new TextRun({
-                  text: `Tujuan dilakukan perjanjian ini adalah sebagai landasan bagi PARA PIHAK dalam melakukan kegiatan dukungan PIHAK KEDUA dalam rangka penyelenggaraan Tri Dharma Perguruan Tinggi melalui kerja sama ${content.judul}.`,
+                  text: "Tujuan dilakukan perjanjian ini adalah sebagai landasan bagi ",
+                }),
+
+                // Bagian 2: Teks "PARA PIHAK" yang di-bold
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+
+                // Bagian 3: Teks normal sisanya (termasuk variabel judul)
+                new TextRun({
+                  text: ` dalam melakukan kegiatan dukungan PIHAK KEDUA dalam rangka penyelenggaraan Tri Dharma Perguruan Tinggi melalui kerja sama ${toCapitalizeFirst(content.judul)}.`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,

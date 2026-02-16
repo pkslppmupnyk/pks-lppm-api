@@ -1,318 +1,520 @@
-const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, UnderlineType, ImageRun } = require("docx");
-const fs = require("fs");
-const path = require("path");
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  AlignmentType,
+  Table,
+  TableRow,
+  TableCell,
+  TableBorders,
+  WidthType,
+  ImageRun,
+  Header,
+  Footer,
+  PageNumber,
+  BorderStyle, // Tambahan untuk divider
+} from "docx";
+import imageSize from "image-size";
+import terbilang from "terbilang";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { toAllCapital, toCapitalizeFirst } from "./textFormatter.js";
 
-// --- HELPER FUNCTIONS ---
+export const generateDocument = async (pks) => {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
 
-// 1. Helper: Mengubah string menjadi Title Case (Huruf Besar Awal Kata) untuk Judul di paragraf pembuka
-function toTitleCase(str) {
-    if (!str) return "";
-    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
+    // ============================================================
+    // 1. PERSIAPAN LOGO
+    // ============================================================
+    const upnLogoPath = path.join(__dirname, "../public/images/logo_upn.png");
+    const upnLogo = fs.readFileSync(upnLogoPath);
 
-// 2. Helper: Mengubah angka menjadi teks (Terbilang Sederhana untuk Tanggal)
-function numberToText(num) {
-    const angka = ["Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-    if (num < 12) return angka[num];
-    if (num < 20) return numberToText(num - 10) + " Belas";
-    if (num < 100) return numberToText(Math.floor(num / 10)) + " Puluh " + (num % 10 !== 0 ? numberToText(num % 10) : "");
-    if (num < 200) return "Seratus " + (num % 100 !== 0 ? numberToText(num % 100) : "");
-    if (num < 1000) return numberToText(Math.floor(num / 100)) + " Ratus " + (num % 100 !== 0 ? numberToText(num % 100) : "");
-    if (num < 2000) return "Seribu " + (num % 1000 !== 0 ? numberToText(num % 1000) : "");
-    if (num >= 2000) {
-        // Khusus tahun 2000an
-        return "Dua Ribu " + numberToText(num % 1000);
-    }
-    return num.toString();
-}
-
-// 3. Helper: Mendapatkan Nama Hari
-function getDayName(date) {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    return days[date.getDay()];
-}
-
-// 4. Helper: Mendapatkan Nama Bulan
-function getMonthName(date) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return months[date.getMonth()];
-}
-
-const generatePksDocument = async (pks) => {
-    // --- PERSIAPAN DATA ---
-
-    // 1. Tanggal (Hari ini / Tanggal Pembuatan)
-    const today = new Date(); 
-    const hari = getDayName(today);
-    const tanggalText = numberToText(today.getDate()); // Misal: "Sepuluh"
-    const bulan = getMonthName(today);
-    const tahunText = toTitleCase(numberToText(today.getFullYear())); // Misal: "Dua Ribu Dua Puluh Enam"
-
-    // 2. Data Pihak Pertama (UPN) - Statis/Config
-    const pihakPertama = {
-        nama: "PROF. DR. MOHAMAD IRHAS EFFENDI, M.SI",
-        jabatan: "Rektor UPN \"Veteran\" Yogyakarta",
-        alamat: "Jl. SWK 104 (Lingkar Utara), Condongcatur, Yogyakarta 55283",
-        instansi: "Universitas Pembangunan Nasional \"Veteran\" Yogyakarta"
-    };
-
-    // 3. Data Pihak Kedua (Mitra) - Dinamis dari DB
-    const pihakKedua = {
-        nama: pks.nama_mitra ? pks.nama_mitra.toUpperCase() : "NAMA MITRA", // Nama Mitra UPPERCASE
-        jabatan: pks.jabatan_mitra || "Pimpinan Mitra",
-        alamat: pks.alamat_mitra || "Alamat Mitra",
-        instansi: pks.instansi_mitra || "Instansi Mitra"
-    };
-
-    // 4. Load Images (Logo)
-    let logoUpnBuffer = null;
-    let logoMitraBuffer = null;
-
-    try {
-        // Load Logo UPN (Default)
-        const upnLogoPath = path.join(__dirname, "../public/images/logo_upn.png");
-        if (fs.existsSync(upnLogoPath)) {
-            logoUpnBuffer = fs.readFileSync(upnLogoPath);
+    let partnerLogo = null;
+    if (pks.logoUpload && pks.logoUpload.fileName) {
+      const partnerLogoPath = path.join(
+        __dirname,
+        "../uploads/logos",
+        pks.logoUpload.fileName,
+      );
+      try {
+        if (fs.existsSync(partnerLogoPath)) {
+          partnerLogo = fs.readFileSync(partnerLogoPath);
         }
-
-        // Load Logo Mitra (Jika ada di object pks, misal pks.logo_url atau path file)
-        // Disini kita beri logika fallback: Jika tidak ada logo mitra, bisa kosong atau default
-        // Contoh implementasi sederhana jika ada path logo mitra:
-        if (pks.logo_mitra_path && fs.existsSync(pks.logo_mitra_path)) {
-             logoMitraBuffer = fs.readFileSync(pks.logo_mitra_path);
-        } else {
-             // Opsional: Gunakan buffer kosong atau logo placeholder jika diperlukan
-             // logoMitraBuffer = ...
-        }
-
-    } catch (error) {
-        console.error("Error loading images:", error);
+      } catch (e) {
+        console.error("Logo mitra tidak ditemukan.");
+      }
     }
 
-    // --- STRUKTUR DOKUMEN ---
-    
-    const doc = new Document({
-        sections: [{
-            properties: {
-                page: {
-                    margin: {
-                        top: 1440, // 1 inch (dalam twips, 1440 twips = 1 inch)
-                        right: 1440,
-                        bottom: 1440,
-                        left: 1440,
-                    },
-                },
-            },
+    const createLogoHeader = () => {
+      const logoChildren = [];
+
+      // REVISI: LOGO MITRA DI KIRI
+      if (partnerLogo) {
+        const partnerDimensions = imageSize(partnerLogo);
+        const partnerHeight = 60;
+        const partnerWidth =
+          (partnerDimensions.width / partnerDimensions.height) * partnerHeight;
+
+        logoChildren.push(
+          new TableCell({
             children: [
-                // ==========================================
-                // 1. HEADER (LOGO)
-                // ==========================================
-                new Table({
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: BorderStyle.NONE, 
-                    rows: [
-                        new TableRow({
-                            children: [
-                                // KOLOM KIRI: Logo Mitra
-                                new TableCell({
-                                    width: { size: 20, type: WidthType.PERCENTAGE },
-                                    borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-                                    children: [
-                                        new Paragraph({
-                                            alignment: AlignmentType.LEFT,
-                                            children: logoMitraBuffer ? [
-                                                new ImageRun({
-                                                    data: logoMitraBuffer,
-                                                    transformation: { width: 80, height: 80 },
-                                                }),
-                                            ] : [], // Jika tidak ada logo, kosong
-                                        })
-                                    ],
-                                }),
-                                // KOLOM TENGAH: Spacer (Kosong)
-                                new TableCell({
-                                    width: { size: 60, type: WidthType.PERCENTAGE },
-                                    borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-                                    children: [],
-                                }),
-                                // KOLOM KANAN: Logo UPN (Dibalik ke Kanan)
-                                new TableCell({
-                                    width: { size: 20, type: WidthType.PERCENTAGE },
-                                    borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-                                    children: [
-                                        new Paragraph({
-                                            alignment: AlignmentType.RIGHT,
-                                            children: logoUpnBuffer ? [
-                                                new ImageRun({
-                                                    data: logoUpnBuffer,
-                                                    transformation: { width: 80, height: 80 },
-                                                }),
-                                            ] : [],
-                                        })
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-
-                new Paragraph({ text: "" }), // Spasi Kosong
-
-                // ==========================================
-                // 2. JUDUL UTAMA
-                // ==========================================
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ text: "PERJANJIAN KERJA SAMA", bold: true, font: "Times New Roman", size: 24 })],
-                }),
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ text: "ANTARA", bold: true, font: "Times New Roman", size: 24 })],
-                }),
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ text: "UNIVERSITAS PEMBANGUNAN NASIONAL “VETERAN” YOGYAKARTA", bold: true, font: "Times New Roman", size: 24 })],
-                }),
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ text: "DENGAN", bold: true, font: "Times New Roman", size: 24 })],
-                }),
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ 
-                        text: pihakKedua.instansi.toUpperCase(), 
-                        bold: true, 
-                        font: "Times New Roman", 
-                        size: 24 
-                    })],
-                }),
-
-                new Paragraph({ text: "" }), // Spasi
-
-                // ==========================================
-                // 3. MEMORANDUM OF AGREEMENT (Italic & Divider)
-                // ==========================================
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    border: {
-                        bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" } // GARIS DIVIDER
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: partnerLogo,
+                    transformation: {
+                      width: partnerWidth,
+                      height: partnerHeight,
                     },
-                    children: [
-                        new TextRun({
-                            text: "MEMORANDUM OF AGREEMENT",
-                            bold: true,
-                            italics: true, // ITALIC sesuai request
-                            font: "Times New Roman",
-                            size: 24
-                        }),
-                    ],
-                    spacing: { after: 240 } // Memberi jarak sedikit setelah garis
-                }),
+                  }),
+                ],
+                alignment: AlignmentType.LEFT,
+              }),
+            ],
+            verticalAlign: "center",
+          }),
+        );
+      } else {
+        // Placeholder jika tidak ada logo mitra
+        logoChildren.push(
+          new TableCell({ children: [], verticalAlign: "center" }),
+        );
+      }
 
-                // ==========================================
-                // 4. NOMOR PKS
-                // ==========================================
+      // REVISI: LOGO UPN DI KANAN
+      const upnDimensions = imageSize(upnLogo);
+      const upnHeight = 60;
+      const upnWidth = (upnDimensions.width / upnDimensions.height) * upnHeight;
+
+      logoChildren.push(
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: upnLogo,
+                  transformation: { width: upnWidth, height: upnHeight },
+                }),
+              ],
+              alignment: AlignmentType.RIGHT, // Align Kanan
+            }),
+          ],
+          verticalAlign: "center",
+        }),
+      );
+
+      return new Table({
+        columnWidths: [4500, 4500],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [new TableRow({ children: logoChildren })],
+        borders: TableBorders.NONE,
+      });
+    };
+
+    // ============================================================
+    // 2. DATA PREPARATION
+    // ============================================================
+
+    const data = pks;
+    const content = data.content;
+    const tanggal = new Date(content.tanggal); // Pastikan object Date
+    const formattedNomorUPN = content.nomor
+      ? content.nomor.replace(/-/g, "/")
+      : "....................";
+
+    // --- LOGIKA PEMBALIKAN PIHAK ---
+    // PIHAK KESATU = MITRA (Data dari Database)
+    const pihakKesatu = {
+      instansi: data.pihakKedua.instansi,
+      nama: data.pihakKedua.nama,
+      jabatan: data.pihakKedua.jabatan,
+      alamat: data.pihakKedua.alamat,
+      nomorDokumen: data.pihakKedua.nomor || "....................",
+    };
+
+    // PIHAK KEDUA = UPN (Data Statis)
+    const pihakKedua = {
+      instansi: `UPN "Veteran" Yogyakarta`,
+      nama: "Prof. Dr. Dyah Sugandini, SE, M.Si",
+      jabatan: "Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat",
+      // REVISI: Teks deskripsi dipotong sedikit agar "PIHAK KEDUA" bisa dibold manual di bawah
+      deskripsi: `Selaku Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta, berdasarkan Surat Keputusan Rektor Universitas pembangunan Nasional "Veteran" Yogyakarta Nomor 1569/UN62/KP/2024 tanggal 20 Maret 2024, dalam jabatan tersebut bertindak untuk dan atas nama Universitas Pembangunan Nasional "Veteran" Yogyakarta, berkedudukan di Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283, untuk selanjutnya disebut `,
+      nip: "19710617 202121 2 001",
+    };
+
+    // Helper Text
+    const capitalizeEachWord = (str) =>
+      str.replace(/\b\w/g, (char) => char.toUpperCase());
+    const namaHari = capitalizeEachWord(
+      tanggal.toLocaleDateString("id-ID", { weekday: "long" }),
+    );
+    const namaBulan = capitalizeEachWord(
+      tanggal.toLocaleDateString("id-ID", { month: "long" }),
+    );
+    const tanggalHuruf = capitalizeEachWord(terbilang(tanggal.getDate()));
+    const tahunHuruf = capitalizeEachWord(terbilang(tanggal.getFullYear()));
+
+    // Formatting Doc settings
+    const fontSize = 24; // 12pt
+    const lineSpacing = 276; // 1.15
+
+    // ============================================================
+    // 3. DOCUMENT GENERATION
+    // ============================================================
+    const doc = new Document({
+      styles: {
+        paragraphStyles: [
+          {
+            id: "Normal",
+            name: "Normal",
+            basedOn: "Normal",
+            next: "Normal",
+            quickFormat: true,
+            paragraph: {
+              spacing: {
+                before: 0,
+                after: 0,
+                line: lineSpacing,
+                lineRule: "auto",
+              },
+              alignment: AlignmentType.JUSTIFIED,
+            },
+            run: {
+              font: "Times New Roman",
+              size: fontSize,
+            },
+          },
+        ],
+      },
+      sections: [
+        {
+          properties: {
+            page: {
+              margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 }, // Approx 2.54cm
+            },
+          },
+          headers: {
+            default: new Header({
+              children: [createLogoHeader(), new Paragraph({ text: "" })],
+            }),
+          },
+          footer: {
+            default: new Footer({
+              children: [
                 new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                        new TextRun({
-                            text: "NOMOR : ", // BOLD
-                            bold: true,
-                            font: "Times New Roman",
-                            size: 24
-                        }),
-                        new TextRun({
-                            text: pks.nomor_pks_upn || " .../UN62/PK/... ", // NORMAL (Tidak Bold)
-                            bold: false,
-                            font: "Times New Roman",
-                            size: 24
-                        }),
-                    ],
+                  children: [
+                    new TextRun({
+                      children: ["Halaman ", PageNumber.CURRENT],
+                    }),
+                    new TextRun({
+                      children: [" dari ", PageNumber.TOTAL_PAGES],
+                    }),
+                  ],
+                  alignment: AlignmentType.RIGHT,
                 }),
+              ],
+            }),
+          },
+          children: [
+            // --- JUDUL ---
+            new Paragraph({
+              children: [
+                new TextRun({ text: "PERJANJIAN KERJA SAMA", bold: true }),
+                new TextRun({ break: 1 }),
+                // REVISI: Italic & Bold untuk MoA
+                new TextRun({
+                  text: "( MEMORANDUM OF AGREEMENT )",
+                  bold: true,
+                  italics: true,
+                }),
+                new TextRun({ break: 1 }),
+                new TextRun({ text: "ANTARA", bold: true }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
 
-                new Paragraph({ text: "" }), // Spasi
+            new Paragraph({ text: "" }),
 
-                // ==========================================
-                // 5. KALIMAT PEMBUKA (Title Case & Tanggal Terbilang)
-                // ==========================================
-                new Paragraph({
-                    alignment: AlignmentType.JUSTIFIED,
-                    children: [
-                        new TextRun({ text: "Perjanjian Kerja Sama tentang ", font: "Times New Roman", size: 24 }),
-                        new TextRun({
-                            text: toTitleCase(pks.judul), // TITLE CASE
-                            bold: true,
-                            font: "Times New Roman",
-                            size: 24
+            // --- NAMA MITRA ---
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: toAllCapital(pihakKesatu.instansi),
+                  bold: true,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            new Paragraph({
+              children: [new TextRun({ text: "DAN", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            // --- NAMA UPN ---
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT`,
+                  bold: true,
+                }),
+                new TextRun({ break: 1 }),
+                new TextRun({
+                  text: `UNIVERSITAS PEMBANGUNAN NASIONAL "VETERAN" YOGYAKARTA`,
+                  bold: true,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // --- TENTANG ---
+            new Paragraph({
+              children: [new TextRun({ text: "TENTANG", bold: true })],
+              alignment: AlignmentType.CENTER,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: toAllCapital(content.judul), bold: true }),
+              ],
+              alignment: AlignmentType.CENTER,
+              // REVISI: DIVIDER (Garis bawah pada paragraf judul/tentang)
+              border: {
+                bottom: {
+                  style: BorderStyle.SINGLE,
+                  size: 6,
+                  color: "000000",
+                },
+              },
+              spacing: { after: 200 }, // Jarak setelah garis
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // --- TABEL NOMOR (REVISI: BOLD LABEL) ---
+            new Table({
+              columnWidths: [2000, 500, 7500],
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                // Baris 1: Nomor Mitra
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: "NOMOR", bold: true }), // BOLD
+                          ],
+                          alignment: AlignmentType.LEFT,
                         }),
-                        new TextRun({ text: " (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada ", font: "Times New Roman", size: 24 }),
-                        // TANGGAL FORMAT TERBILANG
-                        new TextRun({
-                            text: `hari ${hari} tanggal ${toTitleCase(tanggalText)} bulan ${bulan} tahun ${tahunText}`, 
-                            font: "Times New Roman",
-                            size: 24
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: ":", bold: true }), // BOLD
+                          ],
+                          alignment: AlignmentType.CENTER,
                         }),
-                        new TextRun({ text: ", bertempat di Yogyakarta, oleh dan antara:", font: "Times New Roman", size: 24 }),
-                    ],
-                }),
-
-                new Paragraph({ text: "" }), 
-
-                // ==========================================
-                // 6. PARA PIHAK (Format Romawi & Indentasi Rapi)
-                // ==========================================
-                
-                // --- PIHAK I (PERTAMA) ---
-                new Paragraph({
-                    indent: { hanging: 720, left: 720 }, // Indentasi menggantung agar teks lurus setelah angka Romawi
-                    alignment: AlignmentType.JUSTIFIED,
-                    children: [
-                        new TextRun({ text: "I.\t", bold: true, font: "Times New Roman", size: 24 }), // Angka Romawi
-                        new TextRun({ text: pihakPertama.nama + ", ", bold: true, font: "Times New Roman", size: 24 }), // NAMA BOLD
-                        new TextRun({ text: pihakPertama.jabatan + ", berkedudukan di " + pihakPertama.alamat + ", dalam hal ini bertindak untuk dan atas nama " + pihakPertama.instansi + ", selanjutnya disebut ", font: "Times New Roman", size: 24 }),
-                        new TextRun({ text: "PIHAK PERTAMA.", bold: true, font: "Times New Roman", size: 24 }),
-                    ]
-                }),
-
-                new Paragraph({ text: "" }), // Spasi antar pihak
-
-                // --- PIHAK II (KEDUA) ---
-                new Paragraph({
-                    indent: { hanging: 720, left: 720 }, // Indentasi menggantung
-                    alignment: AlignmentType.JUSTIFIED,
-                    children: [
-                        new TextRun({ text: "II.\t", bold: true, font: "Times New Roman", size: 24 }), // Angka Romawi
-                        new TextRun({ text: pihakKedua.nama + ", ", bold: true, font: "Times New Roman", size: 24 }), // NAMA BOLD
-                        new TextRun({ text: pihakKedua.jabatan + ", berkedudukan di " + pihakKedua.alamat + ", dalam hal ini bertindak untuk dan atas nama " + pihakKedua.instansi + ", selanjutnya disebut ", font: "Times New Roman", size: 24 }),
-                        new TextRun({ text: "PIHAK KEDUA.", bold: true, font: "Times New Roman", size: 24 }),
-                    ]
-                }),
-
-                new Paragraph({ text: "" }), 
-
-                // ==========================================
-                // 7. KATA PENGHUBUNG SEBELUM PASAL
-                // ==========================================
-                new Paragraph({
-                    alignment: AlignmentType.JUSTIFIED,
-                    children: [
-                        new TextRun({
-                            text: "PIHAK PERTAMA dan PIHAK KEDUA secara bersama-sama disebut PARA PIHAK dan secara sendiri-sendiri disebut PIHAK. PARA PIHAK sepakat untuk melakukan kerja sama dengan ketentuan dan syarat-syarat sebagai berikut:",
-                            font: "Times New Roman",
-                            size: 24
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: pihakKesatu.nomorDokumen, // NORMAL
+                          alignment: AlignmentType.LEFT,
                         }),
-                    ]
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                  ],
                 }),
+                // Baris 2: Nomor UPN
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: "NOMOR", bold: true }), // BOLD
+                          ],
+                          alignment: AlignmentType.LEFT,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: ":", bold: true }), // BOLD
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          text: formattedNomorUPN, // NORMAL
+                          alignment: AlignmentType.LEFT,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: "none" },
+                        bottom: { style: "none" },
+                        left: { style: "none" },
+                        right: { style: "none" },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+              borders: TableBorders.NONE,
+            }),
 
-                new Paragraph({ text: "" }),
+            new Paragraph({ text: "" }),
 
-                // ... (KODE DISINI AKAN DILANJUTKAN DENGAN LOOPING PASAL 1 DST) ...
+            // --- KALIMAT PEMBUKA (REVISI: Title Case Judul) ---
+            new Paragraph({
+              children: [
+                new TextRun({
+                  // REVISI: Menggunakan toCapitalizeFirst untuk judul
+                  text: `Perjanjian Kerja Sama tentang ${toCapitalizeFirst(content.judul)} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+            }),
 
-            new Paragraph({ text: "" }), // Spacer sebelum Pasal 1
+            new Paragraph({ text: "" }),
 
-            // ============================================================
-            // DISINI MULAI PASAL 1 dst... (Nanti kita lanjut part berikutnya)
-            // ============================================================
+            // --- IDENTITAS PARA PIHAK (REVISI TOTAL: FORMAT ROMAWI I & II) ---
+
+            // PIHAK KESATU (MITRA)
+            new Paragraph({
+              indent: { left: 720, hanging: 720 }, // Indentasi menggantung untuk "I."
+              alignment: AlignmentType.JUSTIFIED,
+              children: [
+                new TextRun({ text: "I.\t", bold: true }),
+                new TextRun({ text: pihakKesatu.nama, bold: true }), // NAMA BOLD
+                new TextRun({ text: ", " }),
+                new TextRun({
+                  text: `selaku ${pihakKesatu.jabatan} pada ${pihakKesatu.instansi}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
+                }),
+                new TextRun({ text: "PIHAK KESATU.", bold: true }), // SEBUTAN BOLD
+              ],
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // PIHAK KEDUA (UPN)
+            new Paragraph({
+              indent: { left: 720, hanging: 720 }, // Indentasi menggantung untuk "II."
+              alignment: AlignmentType.JUSTIFIED,
+              children: [
+                new TextRun({ text: "II.\t", bold: true }),
+                new TextRun({ text: pihakKedua.nama, bold: true }), // NAMA BOLD
+                new TextRun({ text: ", " }),
+                new TextRun({ text: pihakKedua.deskripsi }), // Deskripsi SK dll
+                new TextRun({ text: "PIHAK KEDUA.", bold: true }), // SEBUTAN BOLD
+              ],
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // --- DEFINISI PARA PIHAK ---
+            new Paragraph({
+              children: [
+                new TextRun({ text: "PIHAK KESATU", bold: true }),
+                new TextRun({ text: " dan " }),
+                new TextRun({ text: "PIHAK KEDUA", bold: true }),
+                new TextRun({
+                  text: " untuk selanjutnya secara bersama-sama disebut sebagai ",
+                }),
+                new TextRun({ text: "PARA PIHAK", bold: true }),
+                new TextRun({ text: ", dan masing-masing disebut " }),
+                new TextRun({ text: "PIHAK", bold: true }),
+                new TextRun({ text: "." }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+
+            // --- KONSIDERANS (Latar Belakang) ---
+            new Paragraph({
+              text: "PARA PIHAK terlebih dahulu menerangkan:",
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            // Poin 1 (Mitra)
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `bahwa PIHAK KESATU adalah ${pihakKesatu.instansi};`,
+                }),
+              ],
+              bullet: { level: 0 },
+            }),
+
+            // Poin 2 (UPN - Statis sesuai Template)
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "bahwa PIHAK KEDUA adalah salah satu unsur pelaksana akademik di bidang penelitian dan pengabdian kepada masyarakat yang berada di bawah dan bertanggung jawab kepada Rektor berdasarkan Peraturan Menteri Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia Nomor 20 Tahun 2024 tentang Organisasi dan Tata Kerja Universitas Pembangunan Nasional “Veteran” Yogyakarta;",
+                }),
+              ],
+              bullet: { level: 0 },
+            }),
+
+            new Paragraph({ text: "dan" }),
+
+            // --- KESEPAKATAN ---
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Berdasarkan hal-hal tersebut di atas, PARA PIHAK sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${content.judul} (kegiatan atau program yang akan dilaksanakan).`,
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+            }),
+
+            new Paragraph({ text: "" }),
+            new Paragraph({ text: "" }),
 
             // ============================================================
             // PASAL 1 - TUJUAN
@@ -470,15 +672,14 @@ const generatePksDocument = async (pks) => {
               alignment: AlignmentType.CENTER,
             }),
 
-            // [REVISI] Memperbaiki penomoran dari a), b) ke (1), (2) agar konsisten dengan (3)
-            // (1) PIHAK KESATU (MITRA)
+            // a) PIHAK KESATU (MITRA)
             new Paragraph({
-              text: "(1)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
+              text: "a)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
             new Paragraph({
-              text: "a.\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
+              text: "a)\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
               indent: { left: 1440, hanging: 450 }, // Indent lebih dalam
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -488,24 +689,24 @@ const generatePksDocument = async (pks) => {
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b.\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                      ? "b)\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b.\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
-                        : "b.\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                        ? "b)\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                        : "b)\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
                 }),
               ],
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // (2) PIHAK KEDUA (UPN)
+            // b) PIHAK KEDUA (UPN)
             new Paragraph({
-              text: "(2)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
+              text: "b)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
             new Paragraph({
-              text: "a.\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
+              text: "a)\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -515,17 +716,17 @@ const generatePksDocument = async (pks) => {
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b.\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
+                      ? "b)\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b.\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
-                        : "b.\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
+                        ? "b)\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
+                        : "b)\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
                 }),
               ],
               indent: { left: 1440, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // (3) BERSAMA
+            // c) BERSAMA
             new Paragraph({
               text: "(3)\tPARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab menyusun laporan pelaksanaan kegiatan.",
               indent: { left: 720, hanging: 450 },
@@ -566,15 +767,12 @@ const generatePksDocument = async (pks) => {
 
             // ============================================================
             // BAGIAN DINAMIS: PASAL 7 S/D PENUTUP
-            // Menggunakan fungsi wrapper (IIFE) agar penomoran pasal bisa otomatis
             // ============================================================
             ...(() => {
               const dynamicSections = [];
               let pCounter = 7; // Mulai hitungan dari Pasal 7
 
-              // ------------------------------------------------------------
               // PASAL 7 - PENGHENTIAN PERJANJIAN
-              // ------------------------------------------------------------
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -600,11 +798,9 @@ const generatePksDocument = async (pks) => {
                 }),
                 new Paragraph({ text: "" }),
               );
-              pCounter++; // Naik ke 8
+              pCounter++;
 
-              // ------------------------------------------------------------
               // PASAL 8 (OPSIONAL) - HAK KEKAYAAN INTELEKTUAL
-              // ------------------------------------------------------------
               if (content.hasHakCipta) {
                 dynamicSections.push(
                   new Paragraph({
@@ -627,7 +823,7 @@ const generatePksDocument = async (pks) => {
                     indent: { left: 720, hanging: 450 },
                     alignment: AlignmentType.JUSTIFIED,
                   }),
-                  // Ayat 2: Dinamis sesuai jenis kegiatan
+                  // Ayat 2
                   new Paragraph({
                     children: [
                       new TextRun({
@@ -672,12 +868,10 @@ const generatePksDocument = async (pks) => {
                   }),
                   new Paragraph({ text: "" }),
                 );
-                pCounter++; // Counter naik jika pasal ini ada
+                pCounter++;
               }
 
-              // ------------------------------------------------------------
-              // PASAL FORCE MAJEURE (Nomor Dinamis)
-              // ------------------------------------------------------------
+              // PASAL FORCE MAJEURE
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -720,9 +914,7 @@ const generatePksDocument = async (pks) => {
               );
               pCounter++;
 
-              // ------------------------------------------------------------
-              // PASAL PENYELESAIAN PERSELISIHAN (Nomor Dinamis)
-              // ------------------------------------------------------------
+              // PASAL PENYELESAIAN PERSELISIHAN
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -748,9 +940,7 @@ const generatePksDocument = async (pks) => {
               );
               pCounter++;
 
-              // ------------------------------------------------------------
-              // PASAL PEMBATALAN PERJANJIAN (Nomor Dinamis)
-              // ------------------------------------------------------------
+              // PASAL PEMBATALAN PERJANJIAN
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -778,9 +968,7 @@ const generatePksDocument = async (pks) => {
               );
               pCounter++;
 
-              // ------------------------------------------------------------
-              // PASAL KORESPONDENSI (Nomor Dinamis)
-              // ------------------------------------------------------------
+              // PASAL KORESPONDENSI
               dynamicSections.push(
                 new Paragraph({
                   children: [
@@ -805,7 +993,7 @@ const generatePksDocument = async (pks) => {
                   alignment: AlignmentType.JUSTIFIED,
                 }),
 
-                // Detail Kontak PIHAK KESATU (MITRA) - Data Dinamis
+                // Detail Kontak PIHAK KESATU (MITRA)
                 new Paragraph({
                   children: [
                     new TextRun({
@@ -817,37 +1005,24 @@ const generatePksDocument = async (pks) => {
                   indent: { left: 1440 },
                   spacing: { before: 100 },
                 }),
-                // [REVISI] Menambahkan TabStop untuk merapikan titik dua
                 new Paragraph({
                   text: `Nama\t: ${pihakKesatu.nama}`,
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
                 new Paragraph({
                   text: `Alamat\t: ${pihakKesatu.alamat}`,
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
                 new Paragraph({
                   text: `Email\t: ${data.properties.email || "-"}`,
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
                 new Paragraph({
                   text: `Telepon\t: ${data.properties.telepon || "-"}`,
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
 
-                // Detail Kontak PIHAK KEDUA (UPN) - Statis
+                // Detail Kontak PIHAK KEDUA (UPN)
                 new Paragraph({
                   children: [
                     new TextRun({
@@ -863,27 +1038,17 @@ const generatePksDocument = async (pks) => {
                   text: "Koordinator Tata Usaha Lembaga Penelitian dan Pengabdian Masyarakat Universitas Pembangunan Nasional Veteran Yogyakarta",
                   indent: { left: 1440 },
                 }),
-                // [REVISI] Menambahkan TabStop pada UPN juga
                 new Paragraph({
                   text: "Alamat\t: Jalan Pajajaran 104, Sleman, Daerah Istimewa Yogyakarta, 55283",
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
                 new Paragraph({
                   text: "Email\t: lppm@upnyk.ac.id",
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
                 new Paragraph({
                   text: "Telepon\t: (0274) 486773",
                   indent: { left: 1440 },
-                  tabStops: [
-                    { type: TabStopType.LEFT, position: tabStopIndent },
-                  ],
                 }),
 
                 new Paragraph({
@@ -896,9 +1061,7 @@ const generatePksDocument = async (pks) => {
               );
               pCounter++;
 
-              // ------------------------------------------------------------
-              // PASAL PENUTUP (Nomor Dinamis)
-              // ------------------------------------------------------------
+              // PASAL PENUTUP
               dynamicSections.push(
                 new Paragraph({
                   children: [

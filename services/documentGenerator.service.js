@@ -431,36 +431,47 @@ export const generateDocument = async (pks) => {
             // 1. PIHAK KESATU
             new Paragraph({
               children: [
-                new TextRun({ text: "I.\t" }), // Romawi I + Tab
                 new TextRun({
-                  // Format: [Nama], selaku [Jabatan]...
-                  text: `${pihakKesatu.nama}, selaku ${pihakKesatu.jabatan} pada ${pihakKesatu.instansi}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut PIHAK KESATU.`,
+                  text: "I.",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: "\tNama dan gelar",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: `\t: Selaku ${pihakKesatu.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
+                }),
+                new TextRun({
+                  text: "PIHAK KESATU.",
+                  bold: true,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
-              // Pengaturan Indentasi Gantung (Hanging Indent)
-              indent: {
-                left: 1000, // Jarak teks utama dari kiri (agar lurus setelah tab)
-                hanging: 500, // Menarik baris pertama (angka Romawi) ke kiri
-              },
             }),
 
-            new Paragraph({ text: "" }), // Spacer antar pihak
+            new Paragraph({ text: "" }),
 
             // 2. PIHAK KEDUA
             new Paragraph({
               children: [
-                new TextRun({ text: "II.\t" }), // Romawi II + Tab
                 new TextRun({
-                  // Format: [Nama], [Deskripsi lengkap dari variable pihakKedua]
-                  text: `${pihakKedua.nama}, ${pihakKedua.deskripsi}`,
+                  text: "II.",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: "\tNama dan gelar",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: `\t: Selaku ${pihakKedua.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKedua.instansi}, berkedudukan di ${pihakKedua.alamat}, untuk selanjutnya disebut `,
+                }),
+                new TextRun({
+                  text: "PIHAK KEDUA.",
+                  bold: true,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
-              indent: {
-                left: 1000, // Sama dengan atas agar lurus
-                hanging: 500,
-              },
             }),
 
             new Paragraph({ text: "" }),

@@ -589,11 +589,18 @@ export const generateDocument = async (pks) => {
               indent: { left: 720, hanging: 360 },
               alignment: AlignmentType.JUSTIFIED,
             }),
-            // Poin 2: Statis
+            // Poin 2: Statis (REVISI: BOLD PARA PIHAK)
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "2.\tPemanfaatan sumberdaya manusia serta fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                  text: "2.\tPemanfaatan sumberdaya manusia serta fasilitas sarana dan prasarana yang dimiliki ",
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " untuk menunjang kelancaran penyelenggaraan kegiatan.",
                 }),
               ],
               indent: { left: 720, hanging: 360 },
@@ -613,9 +620,18 @@ export const generateDocument = async (pks) => {
               children: [new TextRun({ text: "PELAKSANAAN", bold: true })],
               alignment: AlignmentType.CENTER,
             }),
-            // Ayat 1
+            // Ayat 1 (REVISI: BOLD PARA PIHAK)
             new Paragraph({
-              text: "(1)\tPARA PIHAK sepakat dalam pelaksanaan kegiatan akan mematuhi seluruh aspek perundang-undangan yang berlaku dan menunjuk wakil-wakilnya yang memiliki kompetensi dan disiplin ilmu yang terkait untuk melaksanakan Perjanjian ini.",
+              children: [
+                new TextRun({ text: "(1)\t" }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " sepakat dalam pelaksanaan kegiatan akan mematuhi seluruh aspek perundang-undangan yang berlaku dan menunjuk wakil-wakilnya yang memiliki kompetensi dan disiplin ilmu yang terkait untuk melaksanakan Perjanjian ini.",
+                }),
+              ],
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -631,9 +647,25 @@ export const generateDocument = async (pks) => {
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
-            // Ayat 4
+            // Ayat 4 (REVISI: BOLD PARA PIHAK 2x)
             new Paragraph({
-              text: "(4)\tApabila salah satu dari PARA PIHAK berkehendak melibatkan pihak lain dalam pelaksanaan kegiatan perjanjian ini maka dibutuhkan persetujuan tertulis dari PARA PIHAK.",
+              children: [
+                new TextRun({
+                  text: "(4)\tApabila salah satu dari ",
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " berkehendak melibatkan pihak lain dalam pelaksanaan kegiatan perjanjian ini maka dibutuhkan persetujuan tertulis dari ",
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({ text: "." }),
+              ],
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -662,9 +694,20 @@ export const generateDocument = async (pks) => {
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
-            // Ayat 2
+            // Ayat 2 (REVISI: BOLD PARA PIHAK)
             new Paragraph({
-              text: "(2)\tSegala biaya yang timbul sebagai akibat dari pelaksanaan Perjanjian ini menjadi beban PARA PIHAK sesuai dengan proporsi tanggung jawab masing-masing;",
+              children: [
+                new TextRun({
+                  text: "(2)\tSegala biaya yang timbul sebagai akibat dari pelaksanaan Perjanjian ini menjadi beban ",
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " sesuai dengan proporsi tanggung jawab masing-masing;",
+                }),
+              ],
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -691,63 +734,83 @@ export const generateDocument = async (pks) => {
               alignment: AlignmentType.CENTER,
             }),
 
-            // a) PIHAK KESATU (MITRA)
+            // Ayat (1) - PIHAK KESATU
             new Paragraph({
-              text: "a)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
+              text: "(1)\tPIHAK KESATU mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
+            // 1.a
             new Paragraph({
-              text: "a)\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
-              indent: { left: 1440, hanging: 450 }, // Indent lebih dalam
+              text: "a.\tMengidentifikasi dan menyiapkan data dan informasi dalam mendukung pelaksanaan Perjanjian Kerjasama;",
+              indent: { left: 1440, hanging: 360 }, // Indent lebih dalam untuk sub-poin
               alignment: AlignmentType.JUSTIFIED,
             }),
+            // 1.b (Contains BOLD PARA PIHAK)
             new Paragraph({
               children: [
                 new TextRun({
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b)\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
+                      ? "b.\tMemfasilitasi Kegiatan Penelitian dan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki "
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b)\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan."
-                        : "b)\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki PARA PIHAK untuk menunjang kelancaran penyelenggaraan kegiatan.",
+                        ? "b.\tMemfasilitasi Kegiatan Penelitian serta menyediakan fasilitas sarana dan prasarana yang dimiliki "
+                        : "b.\tMemfasilitasi Kegiatan Pengabdian bagi Masyarakat serta menyediakan fasilitas sarana dan prasarana yang dimiliki ",
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " untuk menunjang kelancaran penyelenggaraan kegiatan.",
                 }),
               ],
-              indent: { left: 1440, hanging: 450 },
+              indent: { left: 1440, hanging: 360 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // b) PIHAK KEDUA (UPN)
+            // Ayat (2) - PIHAK KEDUA
             new Paragraph({
-              text: "b)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
+              text: "(2)\tPIHAK KEDUA mempunyai Tugas dan Tanggungjawab:",
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
+            // 2.a
             new Paragraph({
-              text: "a)\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
-              indent: { left: 1440, hanging: 450 },
+              text: "a.\tMengolah data dan informasi yang diperoleh dari PIHAK KESATU;",
+              indent: { left: 1440, hanging: 360 },
               alignment: AlignmentType.JUSTIFIED,
             }),
+            // 2.b
             new Paragraph({
               children: [
                 new TextRun({
                   text:
                     content.bentukKerjaSama.includes("Penelitian") &&
                     content.bentukKerjaSama.includes("Pengabdian Masyarakat")
-                      ? "b)\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
+                      ? "b.\tMelaksanakan Kegiatan Penelitian dan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik."
                       : content.bentukKerjaSama.includes("Penelitian")
-                        ? "b)\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
-                        : "b)\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
+                        ? "b.\tMelaksanakan Kegiatan Penelitian sesuai dengan kaidah akademik."
+                        : "b.\tMelaksanakan Kegiatan Pengabdian bagi Masyarakat sesuai dengan kaidah akademik.",
                 }),
               ],
-              indent: { left: 1440, hanging: 450 },
+              indent: { left: 1440, hanging: 360 },
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // c) BERSAMA
+            // Ayat (3) - BERSAMA (Contains BOLD PARA PIHAK)
             new Paragraph({
-              text: "(3)\tPARA PIHAK bersama-sama mempunyai tugas dan tanggungjawab menyusun laporan pelaksanaan kegiatan.",
+              children: [
+                new TextRun({ text: "(3)\t" }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: " bersama-sama mempunyai tugas dan tanggungjawab menyusun laporan pelaksanaan kegiatan.",
+                }),
+              ],
               indent: { left: 720, hanging: 450 },
               alignment: AlignmentType.JUSTIFIED,
             }),
@@ -765,11 +828,18 @@ export const generateDocument = async (pks) => {
               children: [new TextRun({ text: "JANGKA WAKTU", bold: true })],
               alignment: AlignmentType.CENTER,
             }),
-            // Ayat 1: Durasi
+            // Ayat 1: Durasi (REVISI: BOLD PARA PIHAK)
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `(1)\tPerjanjian ini berlaku untuk jangka waktu 1 (satu) tahun, terhitung sejak tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} sampai dengan tanggal ${content.tanggalKadaluarsa ? new Date(content.tanggalKadaluarsa).toLocaleDateString("id-ID") : "...................."} dan dapat diperpanjang berdasarkan kesepakatan PARA PIHAK;`,
+                  text: `(1)\tPerjanjian ini berlaku untuk jangka waktu 1 (satu) tahun, terhitung sejak tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf} sampai dengan tanggal ${content.tanggalKadaluarsa ? new Date(content.tanggalKadaluarsa).toLocaleDateString("id-ID") : "...................."} dan dapat diperpanjang berdasarkan kesepakatan `,
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: ";",
                 }),
               ],
               indent: { left: 720, hanging: 450 },
@@ -837,8 +907,20 @@ export const generateDocument = async (pks) => {
                     ],
                     alignment: AlignmentType.CENTER,
                   }),
+                  // Ayat 1 (REVISI: BOLD para pihak)
                   new Paragraph({
-                    text: "(1)\tSetiap HKI yang dibawa oleh para pihak (HKI bawaan) dalam melaksanakan kegiatan menurut perjanjian ini menjadi milik PIHAK KEDUA.",
+                    children: [
+                      new TextRun({
+                        text: "(1)\tSetiap HKI yang dibawa oleh ",
+                      }),
+                      new TextRun({
+                        text: "para pihak",
+                        bold: true,
+                      }),
+                      new TextRun({
+                        text: " (HKI bawaan) dalam melaksanakan kegiatan menurut perjanjian ini menjadi milik PIHAK KEDUA.",
+                      }),
+                    ],
                     indent: { left: 720, hanging: 450 },
                     alignment: AlignmentType.JUSTIFIED,
                   }),
@@ -880,8 +962,20 @@ export const generateDocument = async (pks) => {
                     indent: { left: 720, hanging: 450 },
                     alignment: AlignmentType.JUSTIFIED,
                   }),
+                  // Ayat 5 (REVISI: BOLD para pihak)
                   new Paragraph({
-                    text: "(5)\tPenghentian pelaksanaan kegiatan menurut perjanjian ini tidak serta merta menghentikan segala hak dan/atau kewajiban para pihak yang diatur dalam pasal ini.",
+                    children: [
+                      new TextRun({
+                        text: "(5)\tPenghentian pelaksanaan kegiatan menurut perjanjian ini tidak serta merta menghentikan segala hak dan/atau kewajiban ",
+                      }),
+                      new TextRun({
+                        text: "para pihak",
+                        bold: true,
+                      }),
+                      new TextRun({
+                        text: " yang diatur dalam pasal ini.",
+                      }),
+                    ],
                     indent: { left: 720, hanging: 450 },
                     alignment: AlignmentType.JUSTIFIED,
                   }),
@@ -924,8 +1018,20 @@ export const generateDocument = async (pks) => {
                   indent: { left: 720, hanging: 450 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
+                // Paragraf Akhir (REVISI: BOLD PARA PIHAK)
                 new Paragraph({
-                  text: "Setelah keadaan Kahar/Force Majeure berakhir dan kondisinya masih memungkinkan kegiatan dapat dilaksanakan oleh PIHAK PERTAMA maka PARA PIHAK akan melanjutkan pelaksanaan perjanjian ini sesuai dengan ketentuan-ketentuan yang diatur dalam perjanjian ini.",
+                  children: [
+                    new TextRun({
+                      text: "Setelah keadaan Kahar/Force Majeure berakhir dan kondisinya masih memungkinkan kegiatan dapat dilaksanakan oleh PIHAK PERTAMA maka ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK",
+                      bold: true,
+                    }),
+                    new TextRun({
+                      text: " akan melanjutkan pelaksanaan perjanjian ini sesuai dengan ketentuan-ketentuan yang diatur dalam perjanjian ini.",
+                    }),
+                  ],
                   indent: { left: 720 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
@@ -1006,8 +1112,20 @@ export const generateDocument = async (pks) => {
                   indent: { left: 720, hanging: 450 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
+                // Ayat 2 (REVISI: BOLD PARA PIHAK)
                 new Paragraph({
-                  text: "(2)\tAlamat PARA PIHAK yang akan dipakai untuk komunikasi guna keperluan sebagaimana dimaksud pada ayat (1) adalah sebagai berikut:",
+                  children: [
+                    new TextRun({
+                      text: "(2)\tAlamat ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK",
+                      bold: true,
+                    }),
+                    new TextRun({
+                      text: " yang akan dipakai untuk komunikasi guna keperluan sebagaimana dimaksud pada ayat (1) adalah sebagai berikut:",
+                    }),
+                  ],
                   indent: { left: 720, hanging: 450 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
@@ -1092,19 +1210,59 @@ export const generateDocument = async (pks) => {
                   children: [new TextRun({ text: "PENUTUP", bold: true })],
                   alignment: AlignmentType.CENTER,
                 }),
+                // Ayat 1 (REVISI: BOLD PARA PIHAK)
                 new Paragraph({
-                  text: "(1)\tPerubahan terhadap Perjanjian Kerja Sama ini akan ditetapkan dalam addendum yang disepakati oleh PARA PIHAK dan merupakan bagian yang tidak terpisahkan dari Perjanjian Kerja Sama ini.",
+                  children: [
+                    new TextRun({
+                      text: "(1)\tPerubahan terhadap Perjanjian Kerja Sama ini akan ditetapkan dalam addendum yang disepakati oleh ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK",
+                      bold: true,
+                    }),
+                    new TextRun({
+                      text: " dan merupakan bagian yang tidak terpisahkan dari Perjanjian Kerja Sama ini.",
+                    }),
+                  ],
                   indent: { left: 720, hanging: 450 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
+                // Ayat 2 (REVISI: BOLD PARA PIHAK)
                 new Paragraph({
-                  text: "(2)\tPerjanjian Kerja Sama ini dibuat dan ditandatangani oleh PARA PIHAK pada hari dan tanggal tersebut pada bagian awal Kesepakatan Bersama ini, dibuat dalam rangkap 2 (dua) yang bermeterai cukup dan mempunyai kekuatan hukum yang sama, untuk masing-masing pihak dan dipergunakan sebagaimana mestinya.",
+                  children: [
+                    new TextRun({
+                      text: "(2)\tPerjanjian Kerja Sama ini dibuat dan ditandatangani oleh ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK",
+                      bold: true,
+                    }),
+                    new TextRun({
+                      text: " pada hari dan tanggal tersebut pada bagian awal Kesepakatan Bersama ini, dibuat dalam rangkap 2 (dua) yang bermeterai cukup dan mempunyai kekuatan hukum yang sama, untuk masing-masing pihak dan dipergunakan sebagaimana mestinya.",
+                    }),
+                  ],
                   indent: { left: 720, hanging: 450 },
                   alignment: AlignmentType.JUSTIFIED,
                 }),
                 new Paragraph({ text: "" }),
+                // Paragraf Penutup Akhir (REVISI: BOLD PARA PIHAK 2x)
                 new Paragraph({
-                  text: "Demikian Perjanjian Kerja Sama ini dibuat oleh PARA PIHAK dengan itikad baik, untuk dapat dipatuhi dan dilaksanakan oleh PARA PIHAK.",
+                  children: [
+                    new TextRun({
+                      text: "Demikian Perjanjian Kerja Sama ini dibuat oleh ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK",
+                      bold: true,
+                    }),
+                    new TextRun({
+                      text: " dengan itikad baik, untuk dapat dipatuhi dan dilaksanakan oleh ",
+                    }),
+                    new TextRun({
+                      text: "PARA PIHAK.",
+                      bold: true,
+                    }),
+                  ],
                   alignment: AlignmentType.JUSTIFIED,
                 }),
                 new Paragraph({ text: "" }),
@@ -1122,71 +1280,37 @@ export const generateDocument = async (pks) => {
               width: { size: 100, type: WidthType.PERCENTAGE },
               rows: [
                 new TableRow({
+                  cantSplit: true, // PENTING: Mencegah tanda tangan terpotong antar halaman
                   children: [
+                    // --- KOLOM KIRI (MITRA / PIHAK KESATU) ---
                     new TableCell({
                       children: [
+                        // HEADER: PIHAK KESATU
                         new Paragraph({
                           children: [
                             new TextRun({ text: "PIHAK KESATU", bold: true }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
+                        // SUB-HEADER: JABATAN (Revisi: Pakai Jabatan & CapitalizeFirst)
                         new Paragraph({
                           children: [
                             new TextRun({
-                              text: toAllCapital(pihakKesatu.instansi),
+                              text: toCapitalizeFirst(pihakKesatu.jabatan),
                               bold: true,
                               size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
-                      ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [
+
+                        // SPACER (Ruang Tanda Tangan)
                         new Paragraph({
-                          children: [
-                            new TextRun({ text: "PIHAK KEDUA", bold: true }),
-                          ],
-                          alignment: AlignmentType.CENTER,
+                          text: "",
+                          spacing: { before: 1500 }, // Jarak untuk tanda tangan
                         }),
-                        new Paragraph({
-                          children: [
-                            new TextRun({
-                              text: "Kepala LPPM UPN Veteran Yogyakarta",
-                              bold: true,
-                              size: 20,
-                            }),
-                          ],
-                          alignment: AlignmentType.CENTER,
-                        }),
-                      ],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                // SPACER TANDA TANGAN
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({ text: "", spacing: { before: 1500 } }),
-                      ],
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({ text: "", spacing: { before: 1500 } }),
-                      ],
-                    }),
-                  ],
-                }),
-                // NAMA PENANDATANGAN
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
+
+                        // NAMA PENANDATANGAN
                         new Paragraph({
                           children: [
                             new TextRun({
@@ -1197,19 +1321,49 @@ export const generateDocument = async (pks) => {
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
+                        // FOOTER: INSTANSI (Pindah ke bawah agar rapi)
                         new Paragraph({
                           children: [
                             new TextRun({
-                              text: pihakKesatu.jabatan,
+                              text: toCapitalizeFirst(pihakKesatu.instansi),
                               size: 20,
                             }),
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
+                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
+
+                    // --- KOLOM KANAN (UPN / PIHAK KEDUA) ---
                     new TableCell({
                       children: [
+                        // HEADER: PIHAK KEDUA
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: "PIHAK KEDUA", bold: true }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        // SUB-HEADER: JABATAN UPN
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: "Kepala LPPM UPN Veteran Yogyakarta",
+                              bold: true,
+                              size: 20,
+                            }),
+                          ],
+                          alignment: AlignmentType.CENTER,
+                        }),
+
+                        // SPACER (Ruang Tanda Tangan)
+                        new Paragraph({
+                          text: "",
+                          spacing: { before: 1500 },
+                        }),
+
+                        // NAMA PENANDATANGAN
                         new Paragraph({
                           children: [
                             new TextRun({
@@ -1220,6 +1374,7 @@ export const generateDocument = async (pks) => {
                           ],
                           alignment: AlignmentType.CENTER,
                         }),
+                        // FOOTER: NIP
                         new Paragraph({
                           children: [
                             new TextRun({
@@ -1230,6 +1385,7 @@ export const generateDocument = async (pks) => {
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
+                      width: { size: 50, type: WidthType.PERCENTAGE },
                     }),
                   ],
                 }),

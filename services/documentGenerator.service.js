@@ -515,7 +515,7 @@ export const generateDocument = async (pks) => {
                   bold: true,
                 }),
                 new TextRun({
-                  text: ` sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${content.judul} (kegiatan atau program yang akan dilaksanakan).`,
+                  text: ` sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${toCapitalizeFirst(content.judul)} (kegiatan atau program yang akan dilaksanakan).`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,

@@ -295,6 +295,7 @@ export const generateDocument = async (pks) => {
             }),
 
             new Paragraph({ text: "" }),
+            new Paragraph({ text: "" }),
 
             // --- TABEL NOMOR (REVISI: BOLD LABEL) ---
             new Table({
@@ -424,57 +425,45 @@ export const generateDocument = async (pks) => {
 
             // --- IDENTITAS PARA PIHAK (REVISI TOTAL: FORMAT ROMAWI I & II) ---
 
-            // PIHAK KESATU (MITRA)
+            // --- IDENTITAS PARA PIHAK (PIHAK KESATU = MITRA) ---
+            // REVISI: Menggunakan format Paragraf Romawi dengan Hanging Indent
+
+            // 1. PIHAK KESATU
             new Paragraph({
-              indent: { left: 720, hanging: 720 }, // Indentasi menggantung untuk "I."
-              alignment: AlignmentType.JUSTIFIED,
               children: [
-                new TextRun({ text: "I.\t", bold: true }),
-                new TextRun({ text: pihakKesatu.nama, bold: true }), // NAMA BOLD
-                new TextRun({ text: ", " }),
+                new TextRun({ text: "I.\t" }), // Romawi I + Tab
                 new TextRun({
-                  text: `selaku ${pihakKesatu.jabatan} pada ${pihakKesatu.instansi}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
+                  // Format: [Nama], selaku [Jabatan]...
+                  text: `${pihakKesatu.nama}, selaku ${pihakKesatu.jabatan} pada ${pihakKesatu.instansi}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut PIHAK KESATU.`,
                 }),
-                new TextRun({ text: "PIHAK KESATU.", bold: true }), // SEBUTAN BOLD
               ],
-            }),
-
-            new Paragraph({ text: "" }),
-
-            // PIHAK KEDUA (UPN)
-            new Paragraph({
-              indent: { left: 720, hanging: 720 }, // Indentasi menggantung untuk "II."
               alignment: AlignmentType.JUSTIFIED,
-              children: [
-                new TextRun({ text: "II.\t", bold: true }),
-                new TextRun({ text: pihakKedua.nama, bold: true }), // NAMA BOLD
-                new TextRun({ text: ", " }),
-                new TextRun({ text: pihakKedua.deskripsi }), // Deskripsi SK dll
-                new TextRun({ text: "PIHAK KEDUA.", bold: true }), // SEBUTAN BOLD
-              ],
+              // Pengaturan Indentasi Gantung (Hanging Indent)
+              indent: {
+                left: 1000, // Jarak teks utama dari kiri (agar lurus setelah tab)
+                hanging: 500, // Menarik baris pertama (angka Romawi) ke kiri
+              },
             }),
 
-            new Paragraph({ text: "" }),
+            new Paragraph({ text: "" }), // Spacer antar pihak
 
-            // --- DEFINISI PARA PIHAK ---
+            // 2. PIHAK KEDUA
             new Paragraph({
               children: [
-                new TextRun({ text: "PIHAK KESATU", bold: true }),
-                new TextRun({ text: " dan " }),
-                new TextRun({ text: "PIHAK KEDUA", bold: true }),
+                new TextRun({ text: "II.\t" }), // Romawi II + Tab
                 new TextRun({
-                  text: " untuk selanjutnya secara bersama-sama disebut sebagai ",
+                  // Format: [Nama], [Deskripsi lengkap dari variable pihakKedua]
+                  text: `${pihakKedua.nama}, ${pihakKedua.deskripsi}`,
                 }),
-                new TextRun({ text: "PARA PIHAK", bold: true }),
-                new TextRun({ text: ", dan masing-masing disebut " }),
-                new TextRun({ text: "PIHAK", bold: true }),
-                new TextRun({ text: "." }),
               ],
               alignment: AlignmentType.JUSTIFIED,
+              indent: {
+                left: 1000, // Sama dengan atas agar lurus
+                hanging: 500,
+              },
             }),
 
             new Paragraph({ text: "" }),
-
             // --- KONSIDERANS (Latar Belakang) ---
             new Paragraph({
               text: "PARA PIHAK terlebih dahulu menerangkan:",

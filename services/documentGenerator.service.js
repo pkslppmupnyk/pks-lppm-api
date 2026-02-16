@@ -429,21 +429,14 @@ export const generateDocument = async (pks) => {
             // REVISI: Menggunakan format Paragraf Romawi dengan Hanging Indent
 
             // 1. PIHAK KESATU
-            // 1. PIHAK KESATU
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "I.",
+                  text: "I.\t",
                   bold: true,
                 }),
                 new TextRun({
-                  text: `\t${pihakKesatu.nama}`,
-                }),
-                new TextRun({
-                  text: "\t: ",
-                }),
-                new TextRun({
-                  text: `Selaku ${pihakKesatu.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
+                  text: `${pihakKesatu.nama}, selaku ${pihakKesatu.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
                 }),
                 new TextRun({
                   text: "PIHAK KESATU.",
@@ -451,6 +444,10 @@ export const generateDocument = async (pks) => {
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
+              indent: {
+                left: 720,
+                hanging: 360,
+              },
             }),
 
             new Paragraph({ text: "" }),
@@ -459,17 +456,11 @@ export const generateDocument = async (pks) => {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "II.",
+                  text: "II.\t",
                   bold: true,
                 }),
                 new TextRun({
-                  text: `\t${pihakKedua.nama}`,
-                }),
-                new TextRun({
-                  text: "\t: ",
-                }),
-                new TextRun({
-                  text: `Selaku ${pihakKedua.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKedua.instansi}, berkedudukan di ${pihakKedua.alamat}, untuk selanjutnya disebut `,
+                  text: `${pihakKedua.nama}, selaku ${pihakKedua.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKedua.instansi}, berkedudukan di ${pihakKedua.alamat}, untuk selanjutnya disebut `,
                 }),
                 new TextRun({
                   text: "PIHAK KEDUA.",
@@ -477,6 +468,10 @@ export const generateDocument = async (pks) => {
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
+              indent: {
+                left: 720,
+                hanging: 360,
+              },
             }),
 
             new Paragraph({ text: "" }),

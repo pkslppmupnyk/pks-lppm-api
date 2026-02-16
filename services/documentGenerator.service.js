@@ -52,7 +52,7 @@ export const generateDocument = async (pks) => {
     const createLogoHeader = () => {
       const logoChildren = [];
 
-      // REVISI: LOGO MITRA DI KIRI
+      // LOGO MITRA DI KIRI
       if (partnerLogo) {
         const partnerDimensions = imageSize(partnerLogo);
         const partnerHeight = 60;
@@ -85,7 +85,7 @@ export const generateDocument = async (pks) => {
         );
       }
 
-      // REVISI: LOGO UPN DI KANAN
+      // LOGO UPN DI KANAN
       const upnDimensions = imageSize(upnLogo);
       const upnHeight = 60;
       const upnWidth = (upnDimensions.width / upnDimensions.height) * upnHeight;
@@ -141,7 +141,7 @@ export const generateDocument = async (pks) => {
       instansi: `UPN "Veteran" Yogyakarta`,
       nama: "Prof. Dr. Dyah Sugandini, SE, M.Si",
       jabatan: "Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat",
-      // REVISI: Teks deskripsi dipotong sedikit agar "PIHAK KEDUA" bisa dibold manual di bawah
+      // Teks deskripsi dipotong sedikit agar "PIHAK KEDUA" bisa dibold manual di bawah
       deskripsi: `Selaku Kepala Lembaga Penelitian dan Pengabdian Kepada Masyarakat Universitas Pembangunan Nasional "Veteran" Yogyakarta, berdasarkan Surat Keputusan Rektor Universitas pembangunan Nasional "Veteran" Yogyakarta Nomor 1569/UN62/KP/2024 tanggal 20 Maret 2024, dalam jabatan tersebut bertindak untuk dan atas nama Universitas Pembangunan Nasional "Veteran" Yogyakarta, berkedudukan di Jl. Pajajaran 104 (Lingkar Utara) Condongcatur, Depok, Sleman, Yogyakarta 55283, untuk selanjutnya disebut `,
       nip: "19710617 202121 2 001",
     };
@@ -225,7 +225,7 @@ export const generateDocument = async (pks) => {
               children: [
                 new TextRun({ text: "PERJANJIAN KERJA SAMA", bold: true }),
                 new TextRun({ break: 1 }),
-                // REVISI: Italic & Bold untuk MoA
+                // Italic & Bold untuk MoA
                 new TextRun({
                   text: "( MEMORANDUM OF AGREEMENT )",
                   bold: true,
@@ -283,7 +283,7 @@ export const generateDocument = async (pks) => {
                 new TextRun({ text: toAllCapital(content.judul), bold: true }),
               ],
               alignment: AlignmentType.CENTER,
-              // REVISI: DIVIDER (Garis bawah pada paragraf judul/tentang)
+              // DIVIDER (Garis bawah pada paragraf judul/tentang)
               border: {
                 bottom: {
                   style: BorderStyle.SINGLE,
@@ -297,7 +297,7 @@ export const generateDocument = async (pks) => {
             new Paragraph({ text: "" }),
             new Paragraph({ text: "" }),
 
-            // --- TABEL NOMOR (REVISI: BOLD LABEL) ---
+            // --- TABEL NOMOR ---
             new Table({
               columnWidths: [2000, 500, 7500],
               width: { size: 100, type: WidthType.PERCENTAGE },
@@ -309,7 +309,7 @@ export const generateDocument = async (pks) => {
                       children: [
                         new Paragraph({
                           children: [
-                            new TextRun({ text: "NOMOR", bold: true }), // BOLD
+                            new TextRun({ text: "NOMOR", bold: true }),
                           ],
                           alignment: AlignmentType.LEFT,
                         }),
@@ -324,9 +324,7 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          children: [
-                            new TextRun({ text: ":", bold: true }), // BOLD
-                          ],
+                          children: [new TextRun({ text: ":", bold: true })],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
@@ -340,7 +338,7 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          text: pihakKesatu.nomorDokumen, // NORMAL
+                          text: pihakKesatu.nomorDokumen,
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
@@ -360,7 +358,7 @@ export const generateDocument = async (pks) => {
                       children: [
                         new Paragraph({
                           children: [
-                            new TextRun({ text: "NOMOR", bold: true }), // BOLD
+                            new TextRun({ text: "NOMOR", bold: true }),
                           ],
                           alignment: AlignmentType.LEFT,
                         }),
@@ -375,9 +373,7 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          children: [
-                            new TextRun({ text: ":", bold: true }), // BOLD
-                          ],
+                          children: [new TextRun({ text: ":", bold: true })],
                           alignment: AlignmentType.CENTER,
                         }),
                       ],
@@ -391,7 +387,7 @@ export const generateDocument = async (pks) => {
                     new TableCell({
                       children: [
                         new Paragraph({
-                          text: formattedNomorUPN, // NORMAL
+                          text: formattedNomorUPN,
                           alignment: AlignmentType.LEFT,
                         }),
                       ],
@@ -414,8 +410,8 @@ export const generateDocument = async (pks) => {
             new Paragraph({
               children: [
                 new TextRun({
-                  // REVISI: Menggunakan toCapitalizeFirst untuk judul
-                  text: `Perjanjian Kerja Sama tentang ${toCapitalizeFirst(content.judul)} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
+                  // REVISI: Menggunakan capitalizeEachWord untuk Capitalize First Letter Each Word
+                  text: `Perjanjian Kerja Sama tentang ${capitalizeEachWord(content.judul)} (selanjutnya disebut “Perjanjian”) ini dibuat dan ditandatangani pada hari ${namaHari} tanggal ${tanggalHuruf} bulan ${namaBulan} tahun ${tahunHuruf}, bertempat di Yogyakarta, oleh dan antara:`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
@@ -423,10 +419,7 @@ export const generateDocument = async (pks) => {
 
             new Paragraph({ text: "" }),
 
-            // --- IDENTITAS PARA PIHAK (REVISI TOTAL: FORMAT ROMAWI I & II) ---
-
-            // --- IDENTITAS PARA PIHAK (PIHAK KESATU = MITRA) ---
-            // REVISI: Menggunakan format Paragraf Romawi dengan Hanging Indent
+            // --- IDENTITAS PARA PIHAK ---
 
             // 1. PIHAK KESATU
             new Paragraph({
@@ -475,39 +468,54 @@ export const generateDocument = async (pks) => {
             }),
 
             new Paragraph({ text: "" }),
+
             // --- KONSIDERANS (Latar Belakang) ---
+            // REVISI: BOLD "PARA PIHAK"
             new Paragraph({
-              text: "PARA PIHAK terlebih dahulu menerangkan:",
+              children: [
+                new TextRun({ text: "PARA PIHAK", bold: true }),
+                new TextRun({ text: " terlebih dahulu menerangkan:" }),
+              ],
               alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // Poin 1 (Mitra)
+            // Poin 1 (Mitra) - REVISI: Ganti Bullet jadi Angka
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `bahwa PIHAK KESATU adalah ${pihakKesatu.instansi};`,
+                  text: `1.\tbahwa PIHAK KESATU adalah ${pihakKesatu.instansi};`,
                 }),
               ],
-              bullet: { level: 0 },
+              indent: { left: 720, hanging: 360 }, // Hanging indent untuk angka
+              alignment: AlignmentType.JUSTIFIED,
             }),
 
-            // Poin 2 (UPN - Statis sesuai Template)
+            // Poin 2 (UPN) - REVISI: Ganti Bullet jadi Angka
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "bahwa PIHAK KEDUA adalah salah satu unsur pelaksana akademik di bidang penelitian dan pengabdian kepada masyarakat yang berada di bawah dan bertanggung jawab kepada Rektor berdasarkan Peraturan Menteri Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia Nomor 20 Tahun 2024 tentang Organisasi dan Tata Kerja Universitas Pembangunan Nasional “Veteran” Yogyakarta;",
+                  text: "2.\tbahwa PIHAK KEDUA adalah salah satu unsur pelaksana akademik di bidang penelitian dan pengabdian kepada masyarakat yang berada di bawah dan bertanggung jawab kepada Rektor berdasarkan Peraturan Menteri Pendidikan, Kebudayaan, Riset, dan Teknologi Republik Indonesia Nomor 20 Tahun 2024 tentang Organisasi dan Tata Kerja Universitas Pembangunan Nasional “Veteran” Yogyakarta;",
                 }),
               ],
-              bullet: { level: 0 },
+              indent: { left: 720, hanging: 360 }, // Hanging indent untuk angka
+              alignment: AlignmentType.JUSTIFIED,
             }),
 
             new Paragraph({ text: "dan" }),
 
             // --- KESEPAKATAN ---
+            // REVISI: BOLD "PARA PIHAK"
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Berdasarkan hal-hal tersebut di atas, PARA PIHAK sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${content.judul} (kegiatan atau program yang akan dilaksanakan).`,
+                  text: `Berdasarkan hal-hal tersebut di atas, `,
+                }),
+                new TextRun({
+                  text: "PARA PIHAK",
+                  bold: true,
+                }),
+                new TextRun({
+                  text: ` sepakat untuk mengikatkan diri dalam Perjanjian Kerja Sama tentang ${content.judul} (kegiatan atau program yang akan dilaksanakan).`,
                 }),
               ],
               alignment: AlignmentType.JUSTIFIED,
@@ -553,7 +561,7 @@ export const generateDocument = async (pks) => {
               text: "Ruang lingkup Perjanjian ini meliputi:",
               alignment: AlignmentType.JUSTIFIED,
             }),
-            // Poin 1: Logika 3 Pilihan (Penelitian, Pengabdian, atau Keduanya)
+            // Poin 1: Logika 3 Pilihan
             new Paragraph({
               children: [
                 new TextRun({
@@ -566,7 +574,6 @@ export const generateDocument = async (pks) => {
                         : "1.\tKegiatan Pengabdian bagi Masyarakat;",
                 }),
               ],
-              // Menggunakan hanging indent agar angka rapi
               indent: { left: 720, hanging: 360 },
               alignment: AlignmentType.JUSTIFIED,
             }),

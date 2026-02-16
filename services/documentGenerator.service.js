@@ -429,6 +429,7 @@ export const generateDocument = async (pks) => {
             // REVISI: Menggunakan format Paragraf Romawi dengan Hanging Indent
 
             // 1. PIHAK KESATU
+            // 1. PIHAK KESATU
             new Paragraph({
               children: [
                 new TextRun({
@@ -436,11 +437,13 @@ export const generateDocument = async (pks) => {
                   bold: true,
                 }),
                 new TextRun({
-                  text: "\tNama dan gelar",
-                  bold: true,
+                  text: `\t${pihakKesatu.nama}`,
                 }),
                 new TextRun({
-                  text: `\t: Selaku ${pihakKesatu.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
+                  text: "\t: ",
+                }),
+                new TextRun({
+                  text: `Selaku ${pihakKesatu.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKesatu.instansi}, berkedudukan di ${pihakKesatu.alamat}, untuk selanjutnya disebut `,
                 }),
                 new TextRun({
                   text: "PIHAK KESATU.",
@@ -460,11 +463,13 @@ export const generateDocument = async (pks) => {
                   bold: true,
                 }),
                 new TextRun({
-                  text: "\tNama dan gelar",
-                  bold: true,
+                  text: `\t${pihakKedua.nama}`,
                 }),
                 new TextRun({
-                  text: `\t: Selaku ${pihakKedua.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKedua.instansi}, berkedudukan di ${pihakKedua.alamat}, untuk selanjutnya disebut `,
+                  text: "\t: ",
+                }),
+                new TextRun({
+                  text: `Selaku ${pihakKedua.jabatan}, dalam jabatan tersebut bertindak untuk dan atas nama ${pihakKedua.instansi}, berkedudukan di ${pihakKedua.alamat}, untuk selanjutnya disebut `,
                 }),
                 new TextRun({
                   text: "PIHAK KEDUA.",
